@@ -3,980 +3,765 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>Ndebe Analysis Tool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Rajdhani:wght@300;400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <title>NDEBE Analysis Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet" />
     <style>
         /* ===== RESET & BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         html, body {
             min-height: 100vh;
-            background: #0A0618;
-            color: #f0ecf5;
-            font-family: 'Rajdhani', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0612 0%, #16082a 100%);
+            color: #f0ecf8;
+            font-family: 'Space Grotesk', sans-serif;
             overflow-x: hidden;
             scroll-behavior: smooth;
         }
+        
         body {
-            padding: 16px 12px 40px;
-            position: relative;
+            padding: 24px 16px 60px;
         }
-        /* ===== AMBIENT GLOW BACKGROUND ===== */
-        .glow-layer {
+
+        /* ===== PREMIUM GLOW BACKDROP ===== */
+        .glow-backdrop {
             position: fixed;
             inset: 0;
             pointer-events: none;
             z-index: 0;
             overflow: hidden;
         }
-        .glow-blob {
+
+        .glow-orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.25;
-            animation: drift 18s ease-in-out infinite alternate;
+            filter: blur(120px);
+            opacity: 0.15;
         }
-        .glow-blob:nth-child(1) {
-            width: 50vw; height: 50vw;
-            top: -10%; left: -20%;
-            background: #7b2fbe;
-            animation-duration: 22s;
+
+        .orb-1 {
+            width: 600px; height: 600px;
+            top: -200px; left: -150px;
+            background: radial-gradient(circle, #7c3aed, #a855f7);
+            animation: float 20s ease-in-out infinite;
         }
-        .glow-blob:nth-child(2) {
-            width: 40vw; height: 40vw;
-            bottom: -10%; right: -10%;
-            background: #e879f9;
-            animation-duration: 26s;
-            animation-delay: 4s;
+
+        .orb-2 {
+            width: 500px; height: 500px;
+            bottom: -100px; right: -100px;
+            background: radial-gradient(circle, #06f 0%, #a855f7 100%);
+            animation: float-delay 24s ease-in-out infinite;
         }
-        .glow-blob:nth-child(3) {
-            width: 30vw; height: 30vw;
-            top: 40%; left: 30%;
-            background: #00ff88;
+
+        .orb-3 {
+            width: 400px; height: 400px;
+            top: 40%; left: 50%;
+            background: radial-gradient(circle, #00d9ff 0%, #7c3aed 100%);
             opacity: 0.08;
-            animation-duration: 30s;
-            animation-delay: 8s;
+            animation: float-slow 30s ease-in-out infinite;
         }
-        @keyframes drift {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(40px, -30px) scale(1.1); }
-            66% { transform: translate(-20px, 40px) scale(0.9); }
-            100% { transform: translate(30px, -20px) scale(1.05); }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -40px) scale(1.1); }
+            66% { transform: translate(-30px, 60px) scale(0.95); }
         }
+
+        @keyframes float-delay {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-40px, 50px) scale(0.9); }
+            66% { transform: translate(60px, -30px) scale(1.05); }
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 30px); }
+        }
+
         /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #1a1228; }
-        ::-webkit-scrollbar-thumb { background: #7b2fbe; border-radius: 4px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(147, 51, 234, 0.1); }
+        ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(180deg, #9333ea, #7c3aed);
+            border-radius: 3px;
+        }
 
         /* ===== CONTAINER ===== */
         .app-container {
             position: relative;
             z-index: 1;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
         /* ===== HEADER ===== */
         .app-header {
             text-align: center;
-            padding: 20px 0 10px;
-            border-bottom: 1px solid rgba(155, 89, 182, 0.2);
-            margin-bottom: 24px;
+            padding: 30px 0 40px;
+            position: relative;
+            z-index: 2;
         }
+
         .app-header h1 {
             font-family: 'Orbitron', monospace;
             font-weight: 900;
-            font-size: 1.8rem;
-            background: linear-gradient(135deg, #9B59B6, #E879F9);
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #06f, #a855f7, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
+            background-clip: text;
+            letter-spacing: 3px;
+            text-shadow: 0 0 60px rgba(147, 51, 234, 0.3);
+            animation: glow-pulse 3s ease-in-out infinite;
         }
+
+        @keyframes glow-pulse {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.3)); }
+            50% { filter: drop-shadow(0 0 40px rgba(147, 51, 234, 0.6)); }
+        }
+
         .app-header .subtitle {
             font-size: 0.85rem;
-            color: #8870a8;
-            margin-top: 4px;
-            font-weight: 300;
-            letter-spacing: 3px;
-        }
-        .connection-status {
-            display: inline-block;
+            color: #a78bfa;
             margin-top: 8px;
-            font-size: 0.7rem;
-            color: #8870a8;
-            font-family: 'JetBrains Mono', monospace;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
         }
-        .connection-status .dot {
-            display: inline-block;
+
+        /* ===== STATUS INDICATOR ===== */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+            font-size: 0.75rem;
+            color: #a78bfa;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            margin-right: 6px;
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-        .connection-status .dot.connected { background: #00FF88; }
-        .connection-status .dot.disconnected { background: #FF3366; animation: none; }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.8); }
+            background: #ff1493;
+            box-shadow: 0 0 8px #ff1493;
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        /* ===== MARKET DROPDOWN ===== */
-        .market-selector {
-            margin-bottom: 20px;
-        }
-        .market-selector label {
-            display: block;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #8870a8;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-        .market-selector select {
-            width: 100%;
-            padding: 12px 16px;
-            background: #1a1228;
-            border: 1px solid rgba(155, 89, 182, 0.3);
-            border-radius: 8px;
-            color: #f0ecf5;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            appearance: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-        .market-selector select:focus {
-            outline: none;
-            border-color: #9B59B6;
-        }
-        .market-selector select option {
-            background: #1a1228;
-            color: #f0ecf5;
+        .status-dot.connected {
+            background: #00ff88;
+            box-shadow: 0 0 12px #00ff88;
         }
 
-        /* ===== LIVE PRICE ===== */
-        .live-price-section {
-            background: rgba(26, 18, 40, 0.8);
-            border: 1px solid rgba(155, 89, 182, 0.15);
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            display: none;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
-        .live-price-section.active { display: block; }
-        .live-price-row {
+
+        /* ===== MAIN CONTENT AREA ===== */
+        .content-area {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ===== SCAN BUTTON - FLOATING ===== */
+        .scan-button-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .live-price-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #8870a8;
-        }
-        .live-price-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #f0ecf5;
-        }
-        .live-price-value .decimal {
-            color: #8870a8;
-        }
-        .tick-feed {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(155, 89, 182, 0.1);
-            max-height: 60px;
-            overflow-y: auto;
-        }
-        .tick-chip {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: rgba(155, 89, 182, 0.15);
-            animation: tick-pop 0.3s ease-out;
-        }
-        .tick-chip.even { color: #00FF88; }
-        .tick-chip.odd { color: #E879F9; }
-        @keyframes tick-pop {
-            0% { transform: scale(0.5); opacity: 0; }
-            60% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
+            justify-content: center;
+            margin: 40px 0;
         }
 
-        /* ===== SCAN BUTTON ===== */
-        .scan-section {
-            background: rgba(26, 18, 40, 0.8);
-            border: 1px solid rgba(155, 89, 182, 0.15);
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-        }
         .scan-btn {
-            width: 100%;
-            padding: 14px;
+            padding: 18px 48px;
             font-family: 'Orbitron', monospace;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.1rem;
             letter-spacing: 2px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(180deg, rgba(155, 89, 182, 0.4), rgba(155, 89, 182, 0.15));
-            color: #f0ecf5;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(168, 85, 247, 0.1)) border-box;
+            color: #f0ecf8;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
-            box-shadow: 0 0 30px rgba(155, 89, 182, 0.1);
+            box-shadow: 0 0 40px rgba(147, 51, 234, 0.2);
+            overflow: hidden;
         }
+
+        .scan-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            padding: 2px;
+            background: linear-gradient(135deg, #9333ea, #a855f7, #ec4899);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .scan-btn:hover::before {
+            opacity: 1;
+        }
+
         .scan-btn:hover {
-            background: linear-gradient(180deg, rgba(155, 89, 182, 0.6), rgba(155, 89, 182, 0.25));
-            box-shadow: 0 0 40px rgba(155, 89, 182, 0.2);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 0 60px rgba(147, 51, 234, 0.4);
         }
+
         .scan-btn:active {
             transform: scale(0.98);
         }
+
         .scan-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
-            transform: none !important;
-        }
-        .scan-progress {
-            display: flex;
-            gap: 20px;
-            margin-top: 12px;
-        }
-        .progress-bar {
-            flex: 1;
-            background: rgba(255,255,255,0.05);
-            border-radius: 4px;
-            height: 4px;
-            overflow: hidden;
-            position: relative;
-        }
-        .progress-bar .fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s;
-            width: 0%;
-        }
-        .progress-bar .fill.violet { background: #9B59B6; }
-        .progress-bar .fill.green { background: #00FF88; }
-        .progress-label {
-            font-size: 0.6rem;
-            color: #8870a8;
-            font-family: 'JetBrains Mono', monospace;
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2px;
         }
 
-        /* ===== STATS GRID ===== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
+        .scan-btn.scanning {
+            animation: button-glow 0.6s ease-in-out infinite;
         }
-        @media (max-width: 600px) {
-            .stats-grid { grid-template-columns: 1fr; }
-        }
-        .stat-card {
-            background: rgba(26, 18, 40, 0.8);
-            border: 1px solid rgba(155, 89, 182, 0.12);
-            border-radius: 12px;
-            padding: 14px 16px;
-        }
-        .stat-card .label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #8870a8;
-            font-weight: 600;
-        }
-        .stat-card .value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-top: 4px;
-        }
-        .stat-card .value .highlight-green { color: #00FF88; }
-        .stat-card .value .highlight-red { color: #FF3366; }
-        .stat-card .value .highlight-amber { color: #FFD700; }
-        .stat-card .value .highlight-violet { color: #E879F9; }
 
-        /* ===== DIGIT FREQUENCY GRAPH ===== */
-        .graph-section {
-            background: rgba(26, 18, 40, 0.8);
-            border: 1px solid rgba(155, 89, 182, 0.12);
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
+        @keyframes button-glow {
+            0%, 100% { box-shadow: 0 0 40px rgba(147, 51, 234, 0.3); }
+            50% { box-shadow: 0 0 80px rgba(147, 51, 234, 0.6); }
+        }
+
+        /* ===== SCAN PROGRESS DISPLAY ===== */
+        .progress-container {
             display: none;
+            margin: 30px 0;
+            padding: 24px;
+            background: rgba(26, 18, 40, 0.5);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
         }
-        .graph-section.active { display: block; }
-        .graph-bars {
-            display: flex;
-            align-items: flex-end;
-            gap: 6px;
-            height: 120px;
-            margin-top: 10px;
+
+        .progress-container.active {
+            display: block;
         }
-        .graph-bar-wrap {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
+
+        .progress-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: #a78bfa;
+            text-transform: uppercase;
+            margin-bottom: 16px;
         }
-        .graph-bar {
-            width: 100%;
-            max-width: 30px;
-            min-height: 4px;
-            border-radius: 3px 3px 0 0;
-            transition: height 0.5s ease;
-            background: #9B59B6;
+
+        .markets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
         }
-        .graph-bar.hot { background: #00FF88; }
-        .graph-bar.cold { background: #FF3366; }
-        .graph-bar-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.6rem;
-            color: #8870a8;
-            margin-top: 4px;
+
+        .market-chip {
+            padding: 12px 16px;
+            background: rgba(147, 51, 234, 0.1);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: default;
         }
-        .graph-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+
+        .market-chip.complete {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .market-chip-name {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: #f0ecf8;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .market-chip-count {
+            font-family: 'Space Mono', monospace;
             font-size: 0.7rem;
-            color: #8870a8;
-            font-family: 'JetBrains Mono', monospace;
+            color: #a78bfa;
+        }
+
+        .market-chip.complete .market-chip-count {
+            color: #00ff88;
         }
 
         /* ===== PREDICTION BUTTONS ===== */
-        .prediction-section {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .prediction-btn {
-            flex: 1;
-            min-width: 100px;
-            padding: 14px 20px;
-            font-family: 'Orbitron', monospace;
-            font-weight: 700;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            text-transform: uppercase;
-        }
-        .prediction-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        .prediction-btn.matches {
-            background: linear-gradient(180deg, rgba(0, 255, 136, 0.3), rgba(0, 255, 136, 0.08));
-            color: #00FF88;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
-        }
-        .prediction-btn.matches:hover:not(:disabled) {
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.15);
-            background: linear-gradient(180deg, rgba(0, 255, 136, 0.4), rgba(0, 255, 136, 0.12));
-        }
-        .prediction-btn.differs {
-            background: linear-gradient(180deg, rgba(255, 51, 102, 0.3), rgba(255, 51, 102, 0.08));
-            color: #FF3366;
-            box-shadow: 0 0 30px rgba(255, 51, 102, 0.05);
-        }
-        .prediction-btn.differs:hover:not(:disabled) {
-            box-shadow: 0 0 40px rgba(255, 51, 102, 0.15);
-            background: linear-gradient(180deg, rgba(255, 51, 102, 0.4), rgba(255, 51, 102, 0.12));
-        }
-        .prediction-btn.overunder {
-            background: linear-gradient(180deg, rgba(155, 89, 182, 0.3), rgba(155, 89, 182, 0.08));
-            color: #E879F9;
-            box-shadow: 0 0 30px rgba(155, 89, 182, 0.05);
-        }
-        .prediction-btn.overunder:hover:not(:disabled) {
-            box-shadow: 0 0 40px rgba(155, 89, 182, 0.15);
-            background: linear-gradient(180deg, rgba(155, 89, 182, 0.4), rgba(155, 89, 182, 0.12));
-        }
-
-        /* ===== RESULT CARDS ===== */
-        .result-card {
-            background: rgba(26, 18, 40, 0.8);
-            border: 1px solid rgba(155, 89, 182, 0.12);
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 16px;
+        .prediction-buttons {
             display: none;
-            animation: result-reveal 0.6s ease-out;
+            gap: 16px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
-        .result-card.active { display: block; }
-        @keyframes result-reveal {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
+
+        .prediction-buttons.active {
+            display: flex;
         }
-        .result-card .result-title {
+
+        .pred-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 16px 24px;
             font-family: 'Orbitron', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            color: #8870a8;
-            text-transform: uppercase;
-        }
-        .result-card .result-digit {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 3rem;
             font-weight: 700;
-            margin: 8px 0;
-        }
-        .result-card .result-digit.matches { color: #00FF88; }
-        .result-card .result-digit.differs { color: #FF3366; }
-        .result-card .result-digit.overunder { color: #E879F9; }
-        .result-card .result-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 8px;
-            margin-top: 10px;
-            font-size: 0.75rem;
-            color: #8870a8;
-        }
-        .result-card .result-stats .stat-item {
-            background: rgba(255,255,255,0.03);
-            padding: 6px 10px;
-            border-radius: 4px;
-        }
-        .result-card .result-stats .stat-item .stat-label {
-            font-size: 0.55rem;
-            text-transform: uppercase;
+            font-size: 0.95rem;
             letter-spacing: 1px;
-        }
-        .result-card .result-stats .stat-item .stat-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            color: #f0ecf5;
-        }
-        .badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.6rem;
-            font-weight: 700;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.15), rgba(100, 200, 255, 0.05));
+            color: #64c8ff;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            box-shadow: 0 0 30px rgba(100, 200, 255, 0.15);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .badge.clean { background: rgba(0, 255, 136, 0.2); color: #00FF88; }
-        .badge.caution { background: rgba(255, 215, 0, 0.2); color: #FFD700; }
-        .badge.cluster { background: rgba(255, 51, 102, 0.2); color: #FF3366; }
-        .badge.persistent { background: rgba(155, 89, 182, 0.3); color: #E879F9; }
-
-        /* ===== STREAK TRACKER ===== */
-        .streak-section {
-            background: rgba(26, 18, 40, 0.8);
-            border: 1px solid rgba(155, 89, 182, 0.12);
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-        }
-        .streak-section .caption {
-            font-size: 0.65rem;
-            color: #665580;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(155, 89, 182, 0.08);
-            font-style: italic;
-        }
-        .streak-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 10px;
-        }
-        @media (max-width: 500px) {
-            .streak-grid { grid-template-columns: 1fr; }
-        }
-        .streak-item {
-            background: rgba(255,255,255,0.03);
-            padding: 10px 14px;
-            border-radius: 6px;
-        }
-        .streak-item .streak-label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #8870a8;
-        }
-        .streak-item .streak-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-top: 2px;
         }
 
-        /* ===== DISCLAIMER ===== */
-        .disclaimer {
-            margin-top: 30px;
-            padding: 16px 20px;
-            background: rgba(26, 18, 40, 0.6);
-            border-radius: 12px;
-            border: 1px solid rgba(155, 89, 182, 0.08);
-            font-size: 0.7rem;
-            color: #665580;
-            text-align: center;
-            line-height: 1.6;
+        .pred-btn.matches {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 255, 136, 0.05));
+            color: #00ff88;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.15);
         }
-        .disclaimer strong { color: #8870a8; }
 
-        /* ===== SCANNING OVERLAY ===== */
-        .scan-overlay {
+        .pred-btn.differs {
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.15), rgba(255, 51, 102, 0.05));
+            color: #ff3366;
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.15);
+        }
+
+        .pred-btn.overunder {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.05));
+            color: #ec4899;
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.15);
+        }
+
+        .pred-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(147, 51, 234, 0.3);
+            filter: brightness(1.2);
+        }
+
+        .pred-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ===== SIGNAL OVERLAY ===== */
+        .signal-overlay {
             position: fixed;
             inset: 0;
-            z-index: 100;
-            background: rgba(10, 6, 24, 0.92);
+            z-index: 1000;
+            background: rgba(10, 6, 18, 0.85);
+            backdrop-filter: blur(10px);
             display: none;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
-            backdrop-filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.4s ease;
         }
-        .scan-overlay.active { display: flex; }
-        .scan-overlay .spinner {
+
+        .signal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* ===== LOADING ANIMATION ===== */
+        .loading-animation {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 1;
+            transition: opacity 0.6s ease;
+        }
+
+        .loading-animation.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .gears-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            height: 120px;
+            margin-bottom: 30px;
+        }
+
+        .gear {
             width: 60px;
             height: 60px;
-            border: 3px solid rgba(155, 89, 182, 0.2);
-            border-top: 3px solid #9B59B6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .gear svg {
+            width: 100%;
+            height: 100%;
         }
-        .scan-overlay .scan-text {
+
+        @keyframes gear-pop {
+            0% { 
+                opacity: 0;
+                transform: scale(0) rotateZ(-180deg);
+            }
+            60% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotateZ(0deg);
+            }
+        }
+
+        @keyframes gear-spin {
+            0% { transform: rotateZ(0deg); }
+            100% { transform: rotateZ(360deg); }
+        }
+
+        .gear:nth-child(1) { animation: gear-pop 0.6s ease-out 0s forwards, gear-spin 4s linear 0.6s infinite; }
+        .gear:nth-child(2) { animation: gear-pop 0.6s ease-out 0.15s forwards, gear-spin 4s linear 0.75s infinite reverse; }
+        .gear:nth-child(3) { animation: gear-pop 0.6s ease-out 0.3s forwards, gear-spin 4s linear 0.9s infinite; }
+        .gear:nth-child(4) { animation: gear-pop 0.6s ease-out 0.45s forwards, gear-spin 4s linear 1.05s infinite reverse; }
+        .gear:nth-child(5) { animation: gear-pop 0.6s ease-out 0.6s forwards, gear-spin 4s linear 1.2s infinite; }
+
+        .loading-text {
             font-family: 'Orbitron', monospace;
-            font-size: 1rem;
-            color: #f0ecf5;
-            margin-top: 20px;
+            font-size: 1.2rem;
             letter-spacing: 2px;
-        }
-        .scan-overlay .scan-sub {
-            font-size: 0.7rem;
-            color: #8870a8;
-            margin-top: 8px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .scan-overlay .scan-checklist {
+            color: #a78bfa;
+            text-align: center;
             margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            text-align: left;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.6rem;
-            color: #8870a8;
-            width: 80%;
-            max-width: 400px;
+            text-transform: uppercase;
         }
-        .scan-overlay .scan-checklist .done { color: #00FF88; }
-        .scan-overlay .scan-checklist .checking { color: #E879F9; animation: pulse-text 0.6s ease-in-out infinite; }
-        @keyframes pulse-text {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+
+        .scanning-markets-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: #7c3aed;
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+
+        /* ===== SIGNAL CARD (REVEALED) ===== */
+        .signal-card {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(147, 51, 234, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            backdrop-filter: blur(30px);
+            box-shadow: 0 0 80px rgba(147, 51, 234, 0.3), 0 0 120px rgba(168, 85, 247, 0.2);
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.5) rotateY(-90deg);
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            perspective: 1000px;
+        }
+
+        .signal-card.reveal {
+            opacity: 1;
+            transform: scale(1) rotateY(0deg);
+        }
+
+        .signal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: #a78bfa;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .signal-digit {
+            font-family: 'Space Mono', monospace;
+            font-size: 4.5rem;
+            font-weight: 700;
+            margin: 20px 0;
+            text-shadow: 0 0 40px currentColor;
+            animation: digit-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes digit-glow {
+            0%, 100% { filter: drop-shadow(0 0 10px currentColor); }
+            50% { filter: drop-shadow(0 0 30px currentColor); }
+        }
+
+        .signal-digit.matches-color { color: #00ff88; }
+        .signal-digit.differs-color { color: #ff3366; }
+        .signal-digit.overunder-color { color: #ec4899; }
+
+        .signal-market {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: #f0ecf8;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .signal-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .signal-stat {
+            padding: 12px;
+            background: rgba(147, 51, 234, 0.08);
+            border-radius: 10px;
+            border: 1px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .signal-stat-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: #a78bfa;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .signal-stat-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.1rem;
+            color: #f0ecf8;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .signal-badge {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 6px 14px;
+            background: rgba(0, 255, 136, 0.15);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            border-radius: 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: #00ff88;
+            letter-spacing: 1px;
+        }
+
+        .signal-badge.caution {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.4);
+            color: #ffd700;
+        }
+
+        .signal-badge.warning {
+            background: rgba(255, 51, 102, 0.15);
+            border-color: rgba(255, 51, 102, 0.4);
+            color: #ff3366;
         }
 
         /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .app-header h1 { font-size: 2rem; }
+            .signal-digit { font-size: 3.5rem; }
+            .signal-card { padding: 30px; }
+            .markets-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+        }
+
         @media (max-width: 480px) {
-            .app-header h1 { font-size: 1.3rem; }
-            .live-price-value { font-size: 1.3rem; }
-            .result-card .result-digit { font-size: 2.2rem; }
-            .prediction-btn { font-size: 0.65rem; padding: 10px 12px; }
+            body { padding: 16px 12px 40px; }
+            .app-header h1 { font-size: 1.6rem; }
+            .scan-btn { padding: 14px 32px; font-size: 0.9rem; }
+            .signal-digit { font-size: 2.8rem; }
+            .signal-card { padding: 20px; }
+            .markets-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
 <body>
 
-<!-- ===== GLOW LAYER ===== -->
-<div class="glow-layer">
-    <div class="glow-blob"></div>
-    <div class="glow-blob"></div>
-    <div class="glow-blob"></div>
+<!-- ===== GLOW BACKDROP ===== -->
+<div class="glow-backdrop">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
 </div>
 
-<!-- ===== SCAN OVERLAY ===== -->
-<div class="scan-overlay" id="scanOverlay">
-    <div class="spinner"></div>
-    <div class="scan-text" id="scanTitle">SCANNING MARKETS</div>
-    <div class="scan-sub" id="scanSub">Collecting tick data...</div>
-    <div class="scan-checklist" id="scanChecklist"></div>
+<!-- ===== SIGNAL OVERLAY ===== -->
+<div class="signal-overlay" id="signalOverlay">
+    <div class="loading-animation" id="loadingAnimation">
+        <div class="gears-container" id="gearsContainer"></div>
+        <div class="loading-text">ANALYZING MARKETS</div>
+        <div class="scanning-markets-text">Finding the signal across all indices...</div>
+    </div>
+    <div class="signal-card" id="signalCard">
+        <div class="signal-title" id="signalTitle">Signal</div>
+        <div class="signal-digit" id="signalDigit">—</div>
+        <div class="signal-market" id="signalMarket">—</div>
+        <div class="signal-stats" id="signalStats"></div>
+        <div class="signal-badge" id="signalBadge">Strong</div>
+    </div>
 </div>
 
-<!-- ===== APP ===== -->
+<!-- ===== MAIN APP ===== -->
 <div class="app-container">
-
     <!-- HEADER -->
     <header class="app-header">
-        <h1>NDEBE ANALYSIS</h1>
-        <div class="subtitle">SYNTHETIC INDEX MONITOR</div>
-        <div class="connection-status" id="connectionStatus">
-            <span class="dot disconnected" id="statusDot"></span>
-            <span id="statusText">Disconnected</span>
+        <h1>NDEBE</h1>
+        <div class="subtitle">Synthetic Index Signal Suite</div>
+        <div class="status-bar">
+            <span class="status-dot connected" id="statusDot"></span>
+            <span id="statusText">Initialized</span>
         </div>
     </header>
 
-    <!-- MARKET DROPDOWN -->
-    <div class="market-selector">
-        <label for="marketSelect">Select Market</label>
-        <select id="marketSelect">
-            <option value="">— Select a market —</option>
-            <optgroup label="Volatility">
-                <option value="R_10">Volatility 10 (R_10)</option>
-                <option value="R_25">Volatility 25 (R_25)</option>
-                <option value="R_50">Volatility 50 (R_50)</option>
-                <option value="R_75">Volatility 75 (R_75)</option>
-                <option value="R_100">Volatility 100 (R_100)</option>
-            </optgroup>
-            <optgroup label="1s Volatility">
-                <option value="1HZ10V">Volatility 10 (1s)</option>
-                <option value="1HZ25V">Volatility 25 (1s)</option>
-                <option value="1HZ50V">Volatility 50 (1s)</option>
-                <option value="1HZ75V">Volatility 75 (1s)</option>
-                <option value="1HZ100V">Volatility 100 (1s)</option>
-            </optgroup>
-            <optgroup label="Jump Indices">
-                <option value="JD10">Jump 10</option>
-                <option value="JD25">Jump 25</option>
-            </optgroup>
-        </select>
-    </div>
-
-    <!-- LIVE PRICE -->
-    <div class="live-price-section" id="livePriceSection">
-        <div class="live-price-row">
-            <span class="live-price-label">Live Price</span>
-            <span class="live-price-value" id="livePrice">—</span>
+    <!-- CONTENT -->
+    <div class="content-area">
+        <!-- SCAN BUTTON -->
+        <div class="scan-button-container">
+            <button class="scan-btn" id="scanBtn">⟳ SCAN ALL MARKETS</button>
         </div>
-        <div class="tick-feed" id="tickFeed"></div>
-    </div>
 
-    <!-- SCAN SECTION -->
-    <div class="scan-section">
-        <button class="scan-btn" id="scanBtn">⟳ SCAN ALL MARKETS</button>
-        <div class="scan-progress">
-            <div style="flex:1">
-                <div class="progress-bar"><div class="fill violet" id="liveProgress" style="width:0%"></div></div>
-                <div class="progress-label"><span>LIVE</span><span id="liveCount">0/30</span></div>
-            </div>
-            <div style="flex:1">
-                <div class="progress-bar"><div class="fill green" id="fullProgress" style="width:0%"></div></div>
-                <div class="progress-label"><span>FULL SCAN</span><span id="fullCount">0/200</span></div>
-            </div>
+        <!-- PROGRESS DISPLAY -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-title">🔄 Gathering 30 Ticks Per Market</div>
+            <div class="markets-grid" id="marketsGrid"></div>
         </div>
-    </div>
 
-    <!-- STATS GRID -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="label">Markets Scanned</div>
-            <div class="value" id="marketsScanned">0 / 0</div>
+        <!-- PREDICTION BUTTONS -->
+        <div class="prediction-buttons" id="predictionButtons">
+            <button class="pred-btn matches" id="matchesBtn">🎯 MATCHES</button>
+            <button class="pred-btn differs" id="differsBtn">⚡ DIFFERS</button>
+            <button class="pred-btn overunder" id="overunderBtn">📊 OVER/UNDER</button>
         </div>
-        <div class="stat-card">
-            <div class="label">Data Quality</div>
-            <div class="value" id="dataQuality">—</div>
-        </div>
-    </div>
-
-    <!-- GRAPH -->
-    <div class="graph-section" id="graphSection">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span class="label" style="font-size:0.6rem;text-transform:uppercase;letter-spacing:1.5px;color:#8870a8;">Digit Frequency (200 ticks)</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#8870a8;" id="chiScore">χ²: —</span>
-        </div>
-        <div class="graph-bars" id="graphBars"></div>
-        <div class="graph-stats">
-            <span>🔥 Hottest: <span id="hottestDigit">—</span></span>
-            <span>❄️ Coldest: <span id="coldestDigit">—</span></span>
-        </div>
-    </div>
-
-    <!-- PREDICTION BUTTONS -->
-    <div class="prediction-section">
-        <button class="prediction-btn matches" id="matchesBtn" disabled>MATCHES</button>
-        <button class="prediction-btn differs" id="differsBtn" disabled>DIFFERS</button>
-        <button class="prediction-btn overunder" id="overunderBtn" disabled>OVER / UNDER</button>
-    </div>
-
-    <!-- RESULTS -->
-    <div id="resultsContainer"></div>
-
-    <!-- STREAK TRACKER -->
-    <div class="streak-section">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:1.5px;color:#8870a8;">STREAK REVERSION TRACKER</span>
-            <span style="font-size:0.55rem;color:#665580;">observational only</span>
-        </div>
-        <div class="streak-grid" id="streakGrid">
-            <div class="streak-item">
-                <div class="streak-label">3 under 4 → next over</div>
-                <div class="streak-value" id="streakUnder4">—</div>
-            </div>
-            <div class="streak-item">
-                <div class="streak-label">3 over 5 → next under</div>
-                <div class="streak-value" id="streakOver5">—</div>
-            </div>
-        </div>
-        <div class="caption">This is a passive frequency log, not a prediction. Digits are generated independently — a streak does not change the odds of the next tick. Use this to observe whether that holds true over time, not as an entry signal.</div>
-    </div>
-
-    <!-- DISCLAIMER -->
-    <div class="disclaimer">
-        <strong>Synthetic index digits are generated by an audited RNG built to be uniform and memoryless.</strong> This console visualizes statistical deviation for monitoring purposes — it is not financial advice, and no output here should be read as a guaranteed entry.
     </div>
 </div>
 
+<!-- ===== JAVASCRIPT ===== -->
 <script>
 // ============================================================
-// COMPLETE FIXED IMPLEMENTATION
+// NDEBE ANALYSIS SUITE - PREMIUM SIGNAL DETECTION
 // ============================================================
 
-// ===== CONFIGURATION =====
+// ===== CONFIG =====
 const MARKETS = ['R_10', 'R_25', 'R_50', 'R_75', 'R_100', '1HZ10V', '1HZ25V', '1HZ50V', '1HZ75V', '1HZ100V', 'JD10', 'JD25'];
 const DECIMALS = {
     'R_10': 3, 'R_25': 3, 'R_50': 4, 'R_75': 4, 'R_100': 2,
     '1HZ10V': 2, '1HZ25V': 2, '1HZ50V': 2, '1HZ75V': 2, '1HZ100V': 2,
     'JD10': 2, 'JD25': 2
 };
+const TICKS_REQUIRED = 30;
 const WS_URL = 'wss://ws.derivws.com/websockets/v3?app_id=1089';
-const SAMPLE_SIZE = 200;
-const LIVE_SIZE = 30;
 
 // ===== STATE =====
 let ws = null;
-let connected = false;
-let marketData = {}; // { symbol: { ticks: [], lastPrice: null, decimals: 3 } }
-let selectedMarket = null;
+let marketData = {};
 let isScanning = false;
 let scanComplete = false;
-let streakLog = { threeUnder4: { occurrences: 0, nextWasOver: 0 }, threeOver5: { occurrences: 0, nextWasUnder: 0 } };
-let chiHistory = {}; // { symbol: [scores] }
-let sessionRecords = { matches: { wins: 0, losses: 0 }, differs: { wins: 0, losses: 0 }, overunder: { wins: 0, losses: 0 } };
 
 // ===== DOM REFS =====
-const $ = id => document.getElementById(id);
-const marketSelect = $('marketSelect');
-const livePriceSection = $('livePriceSection');
-const livePrice = $('livePrice');
-const tickFeed = $('tickFeed');
-const scanBtn = $('scanBtn');
-const liveProgress = $('liveProgress');
-const fullProgress = $('fullProgress');
-const liveCount = $('liveCount');
-const fullCount = $('fullCount');
-const marketsScanned = $('marketsScanned');
-const dataQuality = $('dataQuality');
-const graphSection = $('graphSection');
-const graphBars = $('graphBars');
-const chiScore = $('chiScore');
-const hottestDigit = $('hottestDigit');
-const coldestDigit = $('coldestDigit');
-const matchesBtn = $('matchesBtn');
-const differsBtn = $('differsBtn');
-const overunderBtn = $('overunderBtn');
-const resultsContainer = $('resultsContainer');
-const streakGrid = $('streakGrid');
-const streakUnder4 = $('streakUnder4');
-const streakOver5 = $('streakOver5');
-const scanOverlay = $('scanOverlay');
-const scanTitle = $('scanTitle');
-const scanSub = $('scanSub');
-const scanChecklist = $('scanChecklist');
-const statusDot = $('statusDot');
-const statusText = $('statusText');
+const scanBtn = document.getElementById('scanBtn');
+const progressContainer = document.getElementById('progressContainer');
+const marketsGrid = document.getElementById('marketsGrid');
+const predictionButtons = document.getElementById('predictionButtons');
+const matchesBtn = document.getElementById('matchesBtn');
+const differsBtn = document.getElementById('differsBtn');
+const overunderBtn = document.getElementById('overunderBtn');
+const signalOverlay = document.getElementById('signalOverlay');
+const loadingAnimation = document.getElementById('loadingAnimation');
+const signalCard = document.getElementById('signalCard');
+const gearsContainer = document.getElementById('gearsContainer');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
 
 // ===== UTILITY FUNCTIONS =====
-
 function getLastDigit(price, decimals) {
     const priceStr = price.toFixed(decimals);
     return parseInt(priceStr.slice(-1), 10);
 }
 
-function getDecimals(symbol) {
-    return DECIMALS[symbol] || 3;
+function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
 }
 
-function formatPrice(price, decimals) {
-    return price.toFixed(decimals);
+// ===== GEARS SVG GENERATOR =====
+function generateGearSVG() {
+    return `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="gearGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="35" fill="url(#gearGrad)" opacity="0.3"/>
+            <circle cx="50" cy="50" r="28" fill="none" stroke="url(#gearGrad)" stroke-width="2"/>
+            <circle cx="50" cy="50" r="20" fill="url(#gearGrad)" opacity="0.5"/>
+            <circle cx="50" cy="50" r="12" fill="none" stroke="url(#gearGrad)" stroke-width="1.5"/>
+        </svg>
+    `;
 }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-// ===== DATA QUALITY CHECKS =====
-
-function runsTestZ(history) {
-    if (history.length < 20) return null;
-    const seq = history.map(d => d % 2 === 0);
-    let runs = 1;
-    for (let i = 1; i < seq.length; i++) if (seq[i] !== seq[i-1]) runs++;
-    const n1 = seq.filter(x => x).length;
-    const n2 = seq.length - n1;
-    if (n1 === 0 || n2 === 0) return null;
-    const expRuns = (2*n1*n2)/(n1+n2) + 1;
-    const varRuns = (2*n1*n2*(2*n1*n2 - n1 - n2)) / (((n1+n2)**2) * (n1+n2-1));
-    if (varRuns <= 0) return null;
-    return (runs - expRuns) / Math.sqrt(varRuns);
-}
-
-function autocorrelation(history, lag) {
-    const n = history.length - lag;
-    if (n < 20) return null;
-    const mean = history.reduce((a,b)=>a+b,0) / history.length;
-    let num = 0, den = 0;
-    for (let i = 0; i < history.length; i++) den += (history[i]-mean)**2;
-    for (let i = 0; i < n; i++) num += (history[i]-mean)*(history[i+lag]-mean);
-    return den === 0 ? 0 : num/den;
-}
-
-function shannonEntropy(counts) {
-    const n = counts.reduce((a,b)=>a+b,0);
-    if (n === 0) return 0;
-    return -counts.reduce((acc,c) => c === 0 ? acc : acc + (c/n)*Math.log2(c/n), 0);
-}
-
-function assessDataQuality(ticks) {
-    if (ticks.length < 20) return { badge: 'caution', reason: 'Insufficient data' };
-    
-    const digits = ticks.map(t => getLastDigit(t, 3)); // Use 3 as default, will be corrected per market
-    const counts = Array(10).fill(0);
-    digits.forEach(d => counts[d]++);
-    
-    // Runs test
-    const runsZ = runsTestZ(digits);
-    const runsFail = runsZ !== null && Math.abs(runsZ) > 1.96;
-    
-    // Autocorrelation
-    let maxAuto = 0;
-    for (let lag = 1; lag <= 5; lag++) {
-        const auto = autocorrelation(digits, lag);
-        if (auto !== null && Math.abs(auto) > maxAuto) maxAuto = Math.abs(auto);
+// ===== INITIALIZE GEARS ===== 
+function initializeGears() {
+    gearsContainer.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+        const gearDiv = document.createElement('div');
+        gearDiv.className = 'gear';
+        gearDiv.innerHTML = generateGearSVG();
+        gearsContainer.appendChild(gearDiv);
     }
-    const autoFail = maxAuto > 0.15;
-    
-    // Entropy
-    const entropy = shannonEntropy(counts);
-    const maxEntropy = Math.log2(10);
-    const entropyPct = entropy / maxEntropy;
-    const entropyFail = entropyPct < 0.90;
-    
-    const fails = [runsFail, autoFail, entropyFail].filter(Boolean).length;
-    
-    if (fails === 0) return { badge: 'clean', label: '🟢 Clean', runsZ, maxAuto, entropy, entropyPct };
-    if (fails === 1) return { badge: 'caution', label: '🟡 Caution', runsZ, maxAuto, entropy, entropyPct };
-    return { badge: 'cluster', label: '🔴 Clustering', runsZ, maxAuto, entropy, entropyPct };
 }
 
-// ===== CHI-SQUARE =====
+initializeGears();
 
-function chiSquare(ticks, decimals) {
-    const digits = ticks.map(t => getLastDigit(t, decimals));
-    const counts = Array(10).fill(0);
-    digits.forEach(d => counts[d]++);
-    const n = digits.length;
-    if (n === 0) return null;
-    const expected = n / 10;
-    let chi = 0;
-    for (let i = 0; i < 10; i++) {
-        chi += (counts[i] - expected) ** 2 / expected;
-    }
-    return { chi, counts, n };
-}
-
-// ===== STREAK TRACKING =====
-
-function checkStreakReversion(history, decimals) {
-    if (history.length < 4) return;
-    const digits = history.map(t => getLastDigit(t, decimals));
-    const last3 = digits.slice(-4, -1);
-    const newest = digits[digits.length - 1];
-    if (last3.length === 3 && last3.every(d => d < 4)) {
-        streakLog.threeUnder4.occurrences++;
-        if (newest > 5) streakLog.threeUnder4.nextWasOver++;
-    }
-    if (last3.length === 3 && last3.every(d => d > 5)) {
-        streakLog.threeOver5.occurrences++;
-        if (newest < 4) streakLog.threeOver5.nextWasUnder++;
-    }
-    updateStreakDisplay();
-}
-
-function updateStreakDisplay() {
-    const u4 = streakLog.threeUnder4;
-    const o5 = streakLog.threeOver5;
-    streakUnder4.textContent = u4.occurrences === 0 ? 'No occurrences yet' : 
-        `${u4.nextWasOver}/${u4.occurrences} (${((u4.nextWasOver/u4.occurrences)*100).toFixed(1)}%)`;
-    streakOver5.textContent = o5.occurrences === 0 ? 'No occurrences yet' : 
-        `${o5.nextWasUnder}/${o5.occurrences} (${((o5.nextWasUnder/o5.occurrences)*100).toFixed(1)}%)`;
-}
-
-// ===== WEBSOCKET =====
-
+// ===== WEBSOCKET CONNECTION =====
 function connectWebSocket() {
-    if (ws && ws.readyState === WebSocket.OPEN) return;
-    
-    statusDot.className = 'dot disconnected';
     statusText.textContent = 'Connecting...';
-    
+    statusDot.style.background = '#ffa500';
+    statusDot.style.boxShadow = '0 0 8px #ffa500';
+
     ws = new WebSocket(WS_URL);
-    
+
     ws.onopen = () => {
-        connected = true;
-        statusDot.className = 'dot connected';
         statusText.textContent = 'Connected';
-        console.log('✅ WebSocket connected');
-        
-        // Subscribe to all markets
-        MARKETS.forEach(symbol => {
-            subscribeMarket(symbol);
-        });
+        statusDot.style.background = '#00ff88';
+        statusDot.style.boxShadow = '0 0 12px #00ff88';
+        console.log('✅ Connected to DERIV WS');
     };
-    
+
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
             handleMessage(data);
         } catch (e) {
-            // Ignore parse errors
+            // Ignore
         }
     };
-    
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        statusDot.className = 'dot disconnected';
+
+    ws.onerror = () => {
         statusText.textContent = 'Error';
+        statusDot.style.background = '#ff1493';
     };
-    
+
     ws.onclose = () => {
-        connected = false;
-        statusDot.className = 'dot disconnected';
         statusText.textContent = 'Disconnected';
-        console.log('❌ WebSocket disconnected, reconnecting in 5s...');
+        statusDot.style.background = '#ff1493';
         setTimeout(connectWebSocket, 5000);
     };
-    
-    // Ping to keep alive
+
     setInterval(() => {
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ ping: Date.now() }));
@@ -984,582 +769,336 @@ function connectWebSocket() {
     }, 30000);
 }
 
-function subscribeMarket(symbol) {
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
-    
-    // First, get history
-    ws.send(JSON.stringify({
-        ticks_history: symbol,
-        adjust_limit: 1,
-        end: 'latest',
-        start: Date.now() - 86400000,
-        count: SAMPLE_SIZE,
-        style: 'ticks'
-    }));
-    
-    // Then subscribe to live ticks
-    ws.send(JSON.stringify({
-        ticks: symbol,
-        subscribe: 1
-    }));
-    
-    // Initialize market data
-    if (!marketData[symbol]) {
-        marketData[symbol] = {
-            ticks: [],
-            lastPrice: null,
-            decimals: DECIMALS[symbol] || 3,
-            lastDigit: null,
-            liveReady: false,
-            fullReady: false
-        };
-    }
-}
-
+// ===== MESSAGE HANDLER =====
 function handleMessage(data) {
-    // Handle tick history response
-    if (data.msg_type === 'ticks_history' && data.ticks_history && data.ticks) {
+    if (data.msg_type === 'ticks_history' && data.ticks) {
         const symbol = data.ticks_history;
-        const ticks = data.ticks.map(t => t.quote || t.price || t);
+        const ticks = data.ticks.map(t => t.quote || t.price);
         if (marketData[symbol]) {
             marketData[symbol].ticks = ticks;
-            marketData[symbol].lastPrice = ticks[ticks.length - 1] || null;
-            updateMarketProgress(symbol);
+            updateMarketChip(symbol);
         }
-        return;
     }
-    
-    // Handle live tick
+
     if (data.msg_type === 'tick' && data.tick) {
         const symbol = data.tick.symbol;
-        const price = data.tick.quote || data.tick.price || data.tick;
+        const price = data.tick.quote;
         if (marketData[symbol]) {
-            const decimals = marketData[symbol].decimals;
-            marketData[symbol].lastPrice = price;
             marketData[symbol].ticks.push(price);
-            
-            // Keep buffer at SAMPLE_SIZE
-            if (marketData[symbol].ticks.length > SAMPLE_SIZE) {
-                marketData[symbol].ticks = marketData[symbol].ticks.slice(-SAMPLE_SIZE);
-            }
-            
-            updateMarketProgress(symbol);
-            
-            // Update live price display if selected
-            if (symbol === selectedMarket) {
-                updateLiveDisplay(symbol);
-            }
-            
-            // Check streaks on every tick
-            checkStreakReversion(marketData[symbol].ticks, decimals);
+            updateMarketChip(symbol);
         }
-        return;
-    }
-    
-    // Handle subscription confirmation
-    if (data.msg_type === 'tick' && data.subscription) {
-        // Already handled above
     }
 }
 
-// ===== MARKET PROGRESS =====
-
-function updateMarketProgress(symbol) {
+// ===== MARKET CHIP UPDATE =====
+function updateMarketChip(symbol) {
     const data = marketData[symbol];
-    if (!data) return;
-    
+    const chip = document.getElementById(`chip-${symbol}`);
+    if (!chip) return;
+
     const count = data.ticks.length;
-    data.liveReady = count >= LIVE_SIZE;
-    data.fullReady = count >= SAMPLE_SIZE;
-    
-    // Update overall progress
-    updateScanProgress();
-}
+    const isComplete = count >= TICKS_REQUIRED;
 
-function updateScanProgress() {
-    let totalLive = 0;
-    let totalFull = 0;
-    let readyCount = 0;
-    
-    MARKETS.forEach(symbol => {
-        const data = marketData[symbol];
-        if (data) {
-            const count = data.ticks.length;
-            totalLive += Math.min(count, LIVE_SIZE);
-            totalFull += Math.min(count, SAMPLE_SIZE);
-            if (count >= SAMPLE_SIZE) readyCount++;
-        }
-    });
-    
-    const maxLive = MARKETS.length * LIVE_SIZE;
-    const maxFull = MARKETS.length * SAMPLE_SIZE;
-    
-    const livePct = maxLive > 0 ? (totalLive / maxLive) * 100 : 0;
-    const fullPct = maxFull > 0 ? (totalFull / maxFull) * 100 : 0;
-    
-    liveProgress.style.width = Math.min(livePct, 100) + '%';
-    fullProgress.style.width = Math.min(fullPct, 100) + '%';
-    liveCount.textContent = `${Math.round(totalLive)}/${maxLive}`;
-    fullCount.textContent = `${Math.round(totalFull)}/${maxFull}`;
-    marketsScanned.textContent = `${readyCount} / ${MARKETS.length}`;
-    
-    // Enable buttons when all markets ready
-    const allReady = readyCount === MARKETS.length;
-    scanComplete = allReady;
-    matchesBtn.disabled = !allReady;
-    differsBtn.disabled = !allReady;
-    overunderBtn.disabled = !allReady;
-    
-    if (allReady) {
-        scanBtn.textContent = '✓ ALL MARKETS READY';
-        scanBtn.style.borderColor = '#00FF88';
+    chip.innerHTML = `
+        <div class="market-chip-name">${symbol}</div>
+        <div class="market-chip-count">${count}/${TICKS_REQUIRED}</div>
+    `;
+
+    if (isComplete) {
+        chip.classList.add('complete');
     } else {
-        scanBtn.textContent = '⟳ SCAN ALL MARKETS';
-        scanBtn.style.borderColor = '';
+        chip.classList.remove('complete');
     }
-}
-
-// ===== LIVE DISPLAY =====
-
-function updateLiveDisplay(symbol) {
-    const data = marketData[symbol];
-    if (!data || !data.lastPrice) return;
-    
-    livePriceSection.classList.add('active');
-    const decimals = data.decimals;
-    livePrice.textContent = formatPrice(data.lastPrice, decimals);
-    
-    // Update tick feed
-    const ticks = data.ticks.slice(-10);
-    tickFeed.innerHTML = ticks.reverse().map(t => {
-        const digit = getLastDigit(t, decimals);
-        const parity = digit % 2 === 0 ? 'even' : 'odd';
-        return `<span class="tick-chip ${parity}">${digit}</span>`;
-    }).join('');
-}
-
-// ===== GRAPH =====
-
-function updateGraph(symbol) {
-    const data = marketData[symbol];
-    if (!data || data.ticks.length < 10) {
-        graphSection.classList.remove('active');
-        return;
-    }
-    
-    graphSection.classList.add('active');
-    const decimals = data.decimals;
-    const result = chiSquare(data.ticks, decimals);
-    if (!result) return;
-    
-    const { counts, chi, n } = result;
-    const maxCount = Math.max(...counts, 1);
-    
-    graphBars.innerHTML = counts.map((count, i) => {
-        const pct = (count / maxCount) * 100;
-        const isHot = count === Math.max(...counts);
-        const isCold = count === Math.min(...counts);
-        let cls = 'graph-bar';
-        if (isHot && count > 0) cls += ' hot';
-        if (isCold && count > 0 && !isHot) cls += ' cold';
-        return `<div class="graph-bar-wrap">
-            <div class="${cls}" style="height:${Math.max(pct, 5)}%"></div>
-            <div class="graph-bar-label">${i}</div>
-        </div>`;
-    }).join('');
-    
-    chiScore.textContent = `χ²: ${chi.toFixed(2)} (df=9)`;
-    
-    const hotIdx = counts.indexOf(Math.max(...counts));
-    const coldIdx = counts.indexOf(Math.min(...counts));
-    hottestDigit.textContent = hotIdx;
-    coldestDigit.textContent = coldIdx;
 }
 
 // ===== SCAN ALL MARKETS =====
-
 async function scanAllMarkets() {
     if (isScanning) return;
+
     isScanning = true;
+    scanComplete = false;
     scanBtn.disabled = true;
+    scanBtn.classList.add('scanning');
     scanBtn.textContent = 'SCANNING...';
-    
-    // Show overlay
-    scanOverlay.classList.add('active');
-    scanTitle.textContent = 'SCANNING MARKETS';
-    scanSub.textContent = 'Collecting live tick data...';
-    scanChecklist.innerHTML = '';
-    
-    // Reset buffers
+
+    // Reset data
     MARKETS.forEach(symbol => {
-        if (marketData[symbol]) {
-            marketData[symbol].ticks = [];
-            marketData[symbol].liveReady = false;
-            marketData[symbol].fullReady = false;
+        marketData[symbol] = { ticks: [] };
+    });
+
+    // Show progress
+    progressContainer.classList.add('active');
+    marketsGrid.innerHTML = MARKETS.map(symbol => 
+        `<div class="market-chip" id="chip-${symbol}">
+            <div class="market-chip-name">${symbol}</div>
+            <div class="market-chip-count">0/${TICKS_REQUIRED}</div>
+        </div>`
+    ).join('');
+
+    // Subscribe
+    MARKETS.forEach(symbol => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            // Get history
+            ws.send(JSON.stringify({
+                ticks_history: symbol,
+                adjust_limit: 1,
+                end: 'latest',
+                count: TICKS_REQUIRED,
+                style: 'ticks'
+            }));
+            // Subscribe to live
+            ws.send(JSON.stringify({
+                ticks: symbol,
+                subscribe: 1
+            }));
         }
     });
-    
-    // Re-subscribe to get fresh data
-    MARKETS.forEach(symbol => {
-        subscribeMarket(symbol);
-    });
-    
-    // Wait for data to accumulate
-    let startTime = Date.now();
+
+    // Wait for all markets to gather 30 ticks
     let allReady = false;
-    let checkedMarkets = [];
-    
-    while (!allReady && (Date.now() - startTime) < 60000) {
-        // Update checklist
-        let checklistHTML = '';
-        MARKETS.forEach(symbol => {
-            const data = marketData[symbol];
-            const count = data ? data.ticks.length : 0;
-            const ready = count >= SAMPLE_SIZE;
-            const status = ready ? '✅' : '⏳';
-            const cls = ready ? 'done' : 'checking';
-            checklistHTML += `<div class="${cls}">${status} ${symbol} (${count}/${SAMPLE_SIZE})</div>`;
-        });
-        scanChecklist.innerHTML = checklistHTML;
-        
-        // Check if all ready
-        allReady = MARKETS.every(symbol => {
-            const data = marketData[symbol];
-            return data && data.ticks.length >= SAMPLE_SIZE;
-        });
-        
-        // Update progress
-        updateScanProgress();
-        
-        await sleep(1000);
+    let timeout = Date.now() + 120000; // 2 minute timeout
+
+    while (!allReady && Date.now() < timeout) {
+        allReady = MARKETS.every(symbol => marketData[symbol]?.ticks.length >= TICKS_REQUIRED);
+        await sleep(500);
     }
-    
-    // Update overlay
-    if (allReady) {
-        scanTitle.textContent = '✅ SCAN COMPLETE';
-        scanSub.textContent = `All ${MARKETS.length} markets ready`;
-        scanChecklist.innerHTML = MARKETS.map(s => 
-            `<div class="done">✅ ${s} (${SAMPLE_SIZE}/${SAMPLE_SIZE})</div>`
-        ).join('');
-    } else {
-        scanTitle.textContent = '⚠️ SCAN TIMEOUT';
-        scanSub.textContent = 'Some markets incomplete';
-    }
-    
-    await sleep(1500);
-    scanOverlay.classList.remove('active');
-    
+
+    // Scan complete
+    scanComplete = true;
     isScanning = false;
+    scanBtn.classList.remove('scanning');
     scanBtn.disabled = false;
-    scanBtn.textContent = '✓ ALL MARKETS READY';
-    scanBtn.style.borderColor = '#00FF88';
-    
-    // Update graph if market selected
-    if (selectedMarket) {
-        updateGraph(selectedMarket);
-    }
+    scanBtn.textContent = '✓ GATHERING COMPLETE';
+
+    // Show prediction buttons
+    predictionButtons.classList.add('active');
 }
 
-// ===== PREDICTION ENGINES =====
+// ===== CHI-SQUARE ANALYSIS =====
+function analyzeMarket(symbol, analysisType) {
+    const data = marketData[symbol];
+    if (!data || data.ticks.length < TICKS_REQUIRED) return null;
 
-function runMatchesPrediction() {
-    const results = [];
-    MARKETS.forEach(symbol => {
-        const data = marketData[symbol];
-        if (!data || data.ticks.length < SAMPLE_SIZE) return;
-        const decimals = data.decimals;
-        const digits = data.ticks.map(t => getLastDigit(t, decimals));
-        const counts = Array(10).fill(0);
-        digits.forEach(d => counts[d]++);
-        const n = digits.length;
+    const decimals = DECIMALS[symbol];
+    const digits = data.ticks.map(t => getLastDigit(t, decimals));
+    const counts = Array(10).fill(0);
+    digits.forEach(d => counts[d]++);
+
+    if (analysisType === 'matches') {
         const maxCount = Math.max(...counts);
         const predictedDigit = counts.indexOf(maxCount);
-        const observedPct = (maxCount / n) * 100;
-        const expectedPct = 10;
-        const deviation = observedPct - expectedPct;
-        
-        // Chi-square
-        const chiResult = chiSquare(data.ticks, decimals);
-        const chi = chiResult ? chiResult.chi : 0;
-        
-        // Data quality
-        const dq = assessDataQuality(data.ticks);
-        
-        results.push({
+        const observedPct = (maxCount / digits.length) * 100;
+        const chi = computeChi(counts, digits.length);
+        return {
             symbol,
-            predictedDigit,
-            observedPct,
-            expectedPct,
-            deviation,
+            digit: predictedDigit,
+            percentage: observedPct,
             chi,
-            dq,
-            sampleSize: n
-        });
-    });
-    
-    // Sort by highest observed frequency
-    results.sort((a, b) => b.observedPct - a.observedPct);
-    
-    if (results.length === 0) {
-        showResult('matches', null, 'No markets ready');
-        return;
+            confidence: observedPct > 15 ? 'Strong' : observedPct > 12 ? 'Moderate' : 'Weak'
+        };
     }
-    
-    const top = results[0];
-    showResult('matches', top, null);
-}
 
-function runDiffersPrediction() {
-    const results = [];
-    MARKETS.forEach(symbol => {
-        const data = marketData[symbol];
-        if (!data || data.ticks.length < SAMPLE_SIZE) return;
-        const decimals = data.decimals;
-        const digits = data.ticks.map(t => getLastDigit(t, decimals));
-        const counts = Array(10).fill(0);
-        digits.forEach(d => counts[d]++);
-        const n = digits.length;
-        
-        // Find digit CLOSEST to 10% baseline (smallest deviation)
+    if (analysisType === 'differs') {
         let minDeviation = Infinity;
         let predictedDigit = 0;
         counts.forEach((count, i) => {
-            const observedPct = (count / n) * 100;
-            const deviation = Math.abs(observedPct - 10);
+            const deviation = Math.abs((count / digits.length * 100) - 10);
             if (deviation < minDeviation) {
                 minDeviation = deviation;
                 predictedDigit = i;
             }
         });
-        
-        const observedPct = (counts[predictedDigit] / n) * 100;
-        const expectedPct = 10;
-        const deviation = observedPct - expectedPct;
-        
-        const chiResult = chiSquare(data.ticks, decimals);
-        const chi = chiResult ? chiResult.chi : 0;
-        const dq = assessDataQuality(data.ticks);
-        
-        results.push({
+        const chi = computeChi(counts, digits.length);
+        return {
             symbol,
-            predictedDigit,
-            observedPct,
-            expectedPct,
-            deviation,
+            digit: predictedDigit,
+            deviation: minDeviation,
             chi,
-            dq,
-            sampleSize: n
-        });
-    });
-    
-    // Sort by smallest absolute deviation
-    results.sort((a, b) => Math.abs(a.deviation) - Math.abs(b.deviation));
-    
-    if (results.length === 0) {
-        showResult('differs', null, 'No markets ready');
-        return;
+            confidence: minDeviation < 2 ? 'Strong' : minDeviation < 4 ? 'Moderate' : 'Weak'
+        };
     }
-    
-    const top = results[0];
-    showResult('differs', top, null);
-}
 
-function runOverUnderPrediction() {
-    const results = [];
-    const barriers = [2, 3, 4, 5, 6, 7];
-    
-    MARKETS.forEach(symbol => {
-        const data = marketData[symbol];
-        if (!data || data.ticks.length < SAMPLE_SIZE) return;
-        const decimals = data.decimals;
-        const digits = data.ticks.map(t => getLastDigit(t, decimals));
-        const n = digits.length;
-        
+    if (analysisType === 'overunder') {
+        const barriers = [2, 3, 4, 5, 6, 7];
+        let bestBarrier = null;
+        let bestZ = 0;
+
         barriers.forEach(barrier => {
             const underCount = digits.filter(d => d < barrier).length;
-            const overCount = digits.filter(d => d > barrier).length;
-            const underPct = (underCount / n) * 100;
-            const overPct = (overCount / n) * 100;
-            
-            const baselineUnder = (barrier / 10) * 100;
-            const baselineOver = ((9 - barrier) / 10) * 100;
-            
-            // Z-score for under
-            const pUnder = baselineUnder / 100;
-            const seUnder = Math.sqrt((pUnder * (1 - pUnder)) / n);
-            const zUnder = (underPct / 100 - pUnder) / (seUnder || 0.001);
-            
-            // Z-score for over
-            const pOver = baselineOver / 100;
-            const seOver = Math.sqrt((pOver * (1 - pOver)) / n);
-            const zOver = (overPct / 100 - pOver) / (seOver || 0.001);
-            
-            // Use the larger absolute z-score
-            const z = Math.abs(zUnder) > Math.abs(zOver) ? zUnder : zOver;
-            const direction = Math.abs(zUnder) > Math.abs(zOver) ? 'Under' : 'Over';
-            const observedPct = direction === 'Under' ? underPct : overPct;
-            const baselinePct = direction === 'Under' ? baselineUnder : baselineOver;
-            
-            const chiResult = chiSquare(data.ticks, decimals);
-            const chi = chiResult ? chiResult.chi : 0;
-            const dq = assessDataQuality(data.ticks);
-            
-            // Confidence tier
-            const absZ = Math.abs(z);
-            let tier = 'Weak';
-            let tierColor = '#666666';
-            if (absZ > 2.33) { tier = 'Very Strong'; tierColor = '#00FF88'; }
-            else if (absZ > 1.645) { tier = 'Strong'; tierColor = '#E879F9'; }
-            else if (absZ > 1.28) { tier = 'Moderate'; tierColor = '#FFD700'; }
-            
-            results.push({
-                symbol,
-                barrier,
-                direction,
-                z,
-                absZ,
-                observedPct,
-                baselinePct,
-                chi,
-                dq,
-                tier,
-                tierColor,
-                sampleSize: n
-            });
+            const pUnder = barrier / 10;
+            const seUnder = Math.sqrt((pUnder * (1 - pUnder)) / digits.length);
+            const zUnder = ((underCount / digits.length) - pUnder) / (seUnder || 0.001);
+            if (Math.abs(zUnder) > Math.abs(bestZ)) {
+                bestZ = zUnder;
+                bestBarrier = { barrier, direction: zUnder > 0 ? 'UNDER' : 'OVER', z: zUnder };
+            }
         });
-    });
-    
-    // Sort by largest absolute z-score
-    results.sort((a, b) => b.absZ - a.absZ);
-    
-    if (results.length === 0) {
-        showResult('overunder', null, 'No markets ready');
-        return;
+
+        const chi = computeChi(counts, digits.length);
+        return {
+            symbol,
+            prediction: `${bestBarrier.direction} ${bestBarrier.barrier}`,
+            z: bestBarrier.z,
+            chi,
+            confidence: Math.abs(bestBarrier.z) > 2.33 ? 'Strong' : Math.abs(bestBarrier.z) > 1.645 ? 'Moderate' : 'Weak'
+        };
     }
-    
-    const top = results[0];
-    showResult('overunder', top, null);
 }
 
-// ===== RESULT DISPLAY =====
+function computeChi(counts, n) {
+    const expected = n / 10;
+    let chi = 0;
+    counts.forEach(count => {
+        chi += ((count - expected) ** 2) / expected;
+    });
+    return chi;
+}
 
-function showResult(type, result, error) {
-    const container = resultsContainer;
-    
-    let html = '';
-    
-    if (error) {
-        html = `<div class="result-card active">
-            <div style="color:#FF3366;font-weight:600;">⚠️ ${error}</div>
-        </div>`;
-        container.innerHTML = html;
-        return;
-    }
-    
+// ===== ANALYSIS RUNNER WITH ANIMATION =====
+async function runAnalysis(type) {
+    // Show overlay with loading
+    signalOverlay.classList.add('active');
+    loadingAnimation.classList.remove('fade-out');
+    signalCard.classList.remove('reveal');
+
+    // Run analysis
+    await sleep(100);
+
+    const results = [];
+    MARKETS.forEach(symbol => {
+        const result = analyzeMarket(symbol, type);
+        if (result) results.push(result);
+    });
+
+    // Sort by best signal
     if (type === 'matches') {
-        html = `
-        <div class="result-card active">
-            <div class="result-title">🎯 MATCHES PREDICTION</div>
-            <div class="result-digit matches">${result.predictedDigit}</div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 4px;">
-                <span style="color:#8870a8;font-size:0.75rem;">${result.symbol}</span>
-                <span class="badge ${result.dq.badge}">${result.dq.label}</span>
-            </div>
-            <div class="result-stats">
-                <div class="stat-item"><div class="stat-label">Observed</div><div class="stat-value">${result.observedPct.toFixed(2)}%</div></div>
-                <div class="stat-item"><div class="stat-label">Expected (10%)</div><div class="stat-value">10.00%</div></div>
-                <div class="stat-item"><div class="stat-label">Deviation</div><div class="stat-value" style="color:${result.deviation > 0 ? '#00FF88' : '#FF3366'}">${result.deviation > 0 ? '+' : ''}${result.deviation.toFixed(2)}%</div></div>
-                <div class="stat-item"><div class="stat-label">χ²</div><div class="stat-value">${result.chi.toFixed(2)}</div></div>
-                <div class="stat-item"><div class="stat-label">Sample</div><div class="stat-value">${result.sampleSize}</div></div>
-            </div>
-        </div>`;
+        results.sort((a, b) => b.percentage - a.percentage);
     } else if (type === 'differs') {
-        html = `
-        <div class="result-card active">
-            <div class="result-title">🎯 DIFFERS PREDICTION</div>
-            <div class="result-digit differs">${result.predictedDigit}</div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 4px;">
-                <span style="color:#8870a8;font-size:0.75rem;">${result.symbol}</span>
-                <span class="badge ${result.dq.badge}">${result.dq.label}</span>
-            </div>
-            <div class="result-stats">
-                <div class="stat-item"><div class="stat-label">Observed</div><div class="stat-value">${result.observedPct.toFixed(2)}%</div></div>
-                <div class="stat-item"><div class="stat-label">Expected (10%)</div><div class="stat-value">10.00%</div></div>
-                <div class="stat-item"><div class="stat-label">Deviation</div><div class="stat-value" style="color:${Math.abs(result.deviation) < 1 ? '#FFD700' : '#8870a8'}">${result.deviation > 0 ? '+' : ''}${result.deviation.toFixed(2)}%</div></div>
-                <div class="stat-item"><div class="stat-label">χ²</div><div class="stat-value">${result.chi.toFixed(2)}</div></div>
-                <div class="stat-item"><div class="stat-label">Sample</div><div class="stat-value">${result.sampleSize}</div></div>
-            </div>
-            <div style="margin-top:8px;font-size:0.65rem;color:#665580;">Selected digit closest to 10% baseline (smallest deviation)</div>
-        </div>`;
+        results.sort((a, b) => a.deviation - b.deviation);
     } else if (type === 'overunder') {
-        html = `
-        <div class="result-card active">
-            <div class="result-title">📊 OVER / UNDER PREDICTION</div>
-            <div class="result-digit overunder">${result.direction} ${result.barrier}</div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 4px;">
-                <span style="color:#8870a8;font-size:0.75rem;">${result.symbol}</span>
-                <span class="badge ${result.dq.badge}">${result.dq.label}</span>
-                <span class="badge" style="background:${result.tierColor}22;color:${result.tierColor}">${result.tier}</span>
-            </div>
-            <div class="result-stats">
-                <div class="stat-item"><div class="stat-label">Observed</div><div class="stat-value">${result.observedPct.toFixed(2)}%</div></div>
-                <div class="stat-item"><div class="stat-label">Expected</div><div class="stat-value">${result.baselinePct.toFixed(2)}%</div></div>
-                <div class="stat-item"><div class="stat-label">Z-Score</div><div class="stat-value" style="color:${result.absZ > 1.96 ? '#00FF88' : '#FFD700'}">${result.z.toFixed(3)}</div></div>
-                <div class="stat-item"><div class="stat-label">χ²</div><div class="stat-value">${result.chi.toFixed(2)}</div></div>
-                <div class="stat-item"><div class="stat-label">Sample</div><div class="stat-value">${result.sampleSize}</div></div>
-            </div>
-        </div>`;
+        results.sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
     }
-    
-    container.innerHTML = html;
+
+    const topSignal = results[0];
+
+    // Animate loading for ~9 seconds
+    await sleep(9000);
+
+    // Fade out loading, reveal card
+    loadingAnimation.classList.add('fade-out');
+    await sleep(300);
+    signalCard.classList.add('reveal');
+
+    // Display signal
+    displaySignal(type, topSignal);
+}
+
+// ===== DISPLAY SIGNAL =====
+function displaySignal(type, signal) {
+    const titleMap = {
+        'matches': '🎯 MATCHES SIGNAL',
+        'differs': '⚡ DIFFERS SIGNAL',
+        'overunder': '📊 OVER/UNDER SIGNAL'
+    };
+
+    const colorMap = {
+        'matches': 'matches-color',
+        'differs': 'differs-color',
+        'overunder': 'overunder-color'
+    };
+
+    document.getElementById('signalTitle').textContent = titleMap[type];
+    const digitEl = document.getElementById('signalDigit');
+    digitEl.className = `signal-digit ${colorMap[type]}`;
+
+    if (type === 'matches') {
+        digitEl.textContent = signal.digit;
+        document.getElementById('signalMarket').textContent = signal.symbol;
+        document.getElementById('signalStats').innerHTML = `
+            <div class="signal-stat">
+                <div class="signal-stat-label">Frequency</div>
+                <div class="signal-stat-value">${signal.percentage.toFixed(2)}%</div>
+            </div>
+            <div class="signal-stat">
+                <div class="signal-stat-label">Chi-Square</div>
+                <div class="signal-stat-value">${signal.chi.toFixed(2)}</div>
+            </div>
+            <div class="signal-stat">
+                <div class="signal-stat-label">Ticks</div>
+                <div class="signal-stat-value">${marketData[signal.symbol].ticks.length}</div>
+            </div>
+            <div class="signal-stat">
+                <div class="signal-stat-label">Confidence</div>
+                <div class="signal-stat-value">${signal.confidence}</div>
+            </div>
+        `;
+    } else if (type === 'differs') {
+        digitEl.textContent = signal.digit;
+        document.getElementById('signalMarket').textContent = signal.symbol;
+        document.getElementById('signalStats').innerHTML = `
+            <div class="signal-stat">
+                <div class="signal-stat-label">Deviation</div>
+                <div class="signal-stat-value">${signal.deviation.toFixed(2)}%</div>
+            </div>
+            <div class="signal-stat">
+                <div class="signal-stat-label">Chi-Square</div>
+                <div class="signal-stat-value">${signal.chi.toFixed(2)}</div>
+            </div>
+            <div class="signal-stat">
+                <div class="signal-stat-label">Ticks</div>
+                <div class="signal-stat-value">${marketData[signal.symbol].ticks.length}</div>
+            </div>
+            <div class="signal-stat">
+                <div class="signal-stat-label">Confidence</div>
+                <div class="signal-stat-value">${signal.confidence}</div>
+            </div>
+        `;
+    } else if (type === 'overunder') {
+        digitEl.textContent = signal.prediction;
+        document.getElementById('signalMarket').textContent = signal.symbol;
+        document.getElementById('signalStats').innerHTML = `
+            <div class="signal-stat">
+                <div class="signal-stat-label">Z-Score</div>
+                <div class="signal-stat-value">${signal.z.toFixed(3)}</div>
+            </div>
+            <div class="signal-stat">
+                <div class="signal-stat-label">Chi-Square</div>
+                <div class="signal-stat-value">${signal.chi.toFixed(2)}</div>
+            </div>
+            <div class="signal-stat">
+                <div class="signal-stat-label">Ticks</div>
+                <div class="signal-stat-value">${marketData[signal.symbol].ticks.length}</div>
+            </div>
+            <div class="signal-stat">
+                <div class="signal-stat-label">Confidence</div>
+                <div class="signal-stat-value">${signal.confidence}</div>
+            </div>
+        `;
+    }
+
+    const badgeEl = document.getElementById('signalBadge');
+    badgeEl.textContent = signal.confidence;
+    badgeEl.className = `signal-badge ${signal.confidence === 'Weak' ? 'warning' : signal.confidence === 'Moderate' ? 'caution' : ''}`;
 }
 
 // ===== EVENT LISTENERS =====
+scanBtn.addEventListener('click', scanAllMarkets);
+matchesBtn.addEventListener('click', () => runAnalysis('matches'));
+differsBtn.addEventListener('click', () => runAnalysis('differs'));
+overunderBtn.addEventListener('click', () => runAnalysis('overunder'));
 
-marketSelect.addEventListener('change', function() {
-    selectedMarket = this.value;
-    if (selectedMarket) {
-        updateLiveDisplay(selectedMarket);
-        updateGraph(selectedMarket);
-    } else {
-        livePriceSection.classList.remove('active');
-        graphSection.classList.remove('active');
+// Close overlay on click outside
+signalOverlay.addEventListener('click', (e) => {
+    if (e.target === signalOverlay) {
+        signalOverlay.classList.remove('active');
+        loadingAnimation.classList.remove('fade-out');
+        signalCard.classList.remove('reveal');
     }
 });
 
-scanBtn.addEventListener('click', scanAllMarkets);
-
-matchesBtn.addEventListener('click', runMatchesPrediction);
-differsBtn.addEventListener('click', runDiffersPrediction);
-overunderBtn.addEventListener('click', runOverUnderPrediction);
-
 // ===== INIT =====
-
-function init() {
-    // Initialize market data
-    MARKETS.forEach(symbol => {
-        marketData[symbol] = {
-            ticks: [],
-            lastPrice: null,
-            decimals: DECIMALS[symbol] || 3,
-            liveReady: false,
-            fullReady: false
-        };
-    });
-    
-    // Connect WebSocket
-    connectWebSocket();
-    
-    // Update progress periodically
-    setInterval(updateScanProgress, 2000);
-    
-    // Populate dropdown
-    console.log('✅ Ndebe Analysis Tool initialized');
-    console.log(`📊 Monitoring ${MARKETS.length} markets`);
-}
-
-// Start the app
-init();
+connectWebSocket();
+console.log('✅ NDEBE Analysis Suite Initialized');
 
 </script>
 </body>
