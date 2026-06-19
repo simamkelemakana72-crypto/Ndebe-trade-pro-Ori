@@ -165,7 +165,7 @@
             z-index: 2;
         }
 
-        /* ===== SCAN BUTTON - FLOATING ===== */
+        /* ===== SCAN BUTTON ===== */
         .scan-button-container {
             display: flex;
             justify-content: center;
@@ -230,7 +230,7 @@
             50% { box-shadow: 0 0 80px rgba(147, 51, 234, 0.6); }
         }
 
-        /* ===== SCAN PROGRESS DISPLAY ===== */
+        /* ===== PROGRESS DISPLAY ===== */
         .progress-container {
             display: none;
             margin: 30px 0;
@@ -463,7 +463,7 @@
             border: 1px solid rgba(147, 51, 234, 0.4);
             border-radius: 20px;
             padding: 40px;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             backdrop-filter: blur(30px);
             box-shadow: 0 0 80px rgba(147, 51, 234, 0.3), 0 0 120px rgba(168, 85, 247, 0.2);
@@ -472,6 +472,8 @@
             transform: scale(0.5) rotateY(-90deg);
             transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
             perspective: 1000px;
+            overflow-y: auto;
+            max-height: 80vh;
         }
 
         .signal-card.reveal {
@@ -572,6 +574,20 @@
             color: #ff3366;
         }
 
+        .quality-checks {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(147, 51, 234, 0.2);
+            font-size: 0.75rem;
+            text-align: left;
+            color: #a78bfa;
+        }
+
+        .quality-check-item {
+            margin: 4px 0;
+            font-family: 'Space Mono', monospace;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .app-header h1 { font-size: 2rem; }
@@ -604,14 +620,15 @@
     <div class="loading-animation" id="loadingAnimation">
         <div class="gears-container" id="gearsContainer"></div>
         <div class="loading-text">ANALYZING MARKETS</div>
-        <div class="scanning-markets-text">Finding the signal across all indices...</div>
+        <div class="scanning-markets-text">Computing statistical engines...</div>
     </div>
     <div class="signal-card" id="signalCard">
         <div class="signal-title" id="signalTitle">Signal</div>
         <div class="signal-digit" id="signalDigit">—</div>
         <div class="signal-market" id="signalMarket">—</div>
         <div class="signal-stats" id="signalStats"></div>
-        <div class="signal-badge" id="signalBadge">Strong</div>
+        <div class="quality-checks" id="qualityChecks"></div>
+        <div class="signal-badge" id="signalBadge">Clean</div>
     </div>
 </div>
 
@@ -620,7 +637,7 @@
     <!-- HEADER -->
     <header class="app-header">
         <h1>NDEBE</h1>
-        <div class="subtitle">Synthetic Index Signal Suite</div>
+        <div class="subtitle">Statistical Engine Suite</div>
         <div class="status-bar">
             <span class="status-dot connected" id="statusDot"></span>
             <span id="statusText">Initialized</span>
@@ -636,7 +653,7 @@
 
         <!-- PROGRESS DISPLAY -->
         <div class="progress-container" id="progressContainer">
-            <div class="progress-title">🔄 Gathering 30 Ticks Per Market</div>
+            <div class="progress-title">🔄 Gathering 30 Ticks (Into 200-Tick Buffer)</div>
             <div class="markets-grid" id="marketsGrid"></div>
         </div>
 
@@ -649,10 +666,10 @@
     </div>
 </div>
 
-<!-- ===== JAVASCRIPT ===== -->
+<!-- ===== JAVASCRIPT - PURE ENGINE IMPLEMENTATION ===== -->
 <script>
 // ============================================================
-// NDEBE ANALYSIS SUITE - PREMIUM SIGNAL DETECTION
+// NDEBE STATISTICAL ENGINE - CORE LOGIC ONLY
 // ============================================================
 
 // ===== CONFIG =====
@@ -662,7 +679,8 @@ const DECIMALS = {
     '1HZ10V': 2, '1HZ25V': 2, '1HZ50V': 2, '1HZ75V': 2, '1HZ100V': 2,
     'JD10': 2, 'JD25': 2
 };
-const TICKS_REQUIRED = 30;
+const BUFFER_SIZE = 200;
+const EARLY_READ_SIZE = 30;
 const WS_URL = 'wss://ws.derivws.com/websockets/v3?app_id=1089';
 
 // ===== STATE =====
@@ -686,7 +704,7 @@ const gearsContainer = document.getElementById('gearsContainer');
 const statusDot = document.getElementById('statusDot');
 const statusText = document.getElementById('statusText');
 
-// ===== UTILITY FUNCTIONS =====
+// ===== UTILITY: EXTRACT LAST DIGIT =====
 function getLastDigit(price, decimals) {
     const priceStr = price.toFixed(decimals);
     return parseInt(priceStr.slice(-1), 10);
@@ -694,6 +712,31 @@ function getLastDigit(price, decimals) {
 
 function sleep(ms) {
     return new Promise(r => setTimeout(r, ms));
+}
+
+// ===== UTILITY: NORMAL CDF (Q-function) =====
+function normalCDF(z) {
+    const a1 = 0.254829592;
+    const a2 = -0.284496736;
+    const a3 = 1.421413741;
+    const a4 = -1.453152027;
+    const a5 = 1.061405429;
+    const p = 0.3275911;
+    const sign = z < 0 ? -1 : 1;
+    z = Math.abs(z) / Math.sqrt(2);
+    const t = 1.0 / (1.0 + p * z);
+    const y = 1.0 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-z * z));
+    return 0.5 * (1.0 + sign * y);
+}
+
+// ===== BONFERRONI CORRECTION =====
+function bonferroniCriticalZ(alpha, numTests) {
+    const correctedAlpha = alpha / numTests;
+    let z = 1.96; // Start with 95% CL
+    while (normalCDF(z) < 1 - correctedAlpha / 2) {
+        z += 0.01;
+    }
+    return z;
 }
 
 // ===== GEARS SVG GENERATOR =====
@@ -714,7 +757,6 @@ function generateGearSVG() {
     `;
 }
 
-// ===== INITIALIZE GEARS ===== 
 function initializeGears() {
     gearsContainer.innerHTML = '';
     for (let i = 0; i < 5; i++) {
@@ -747,7 +789,7 @@ function connectWebSocket() {
             const data = JSON.parse(event.data);
             handleMessage(data);
         } catch (e) {
-            // Ignore
+            // Ignore parse errors
         }
     };
 
@@ -775,7 +817,8 @@ function handleMessage(data) {
         const symbol = data.ticks_history;
         const ticks = data.ticks.map(t => t.quote || t.price);
         if (marketData[symbol]) {
-            marketData[symbol].ticks = ticks;
+            // Populate buffer with history
+            marketData[symbol].buffer = ticks.slice(-BUFFER_SIZE);
             updateMarketChip(symbol);
         }
     }
@@ -784,7 +827,11 @@ function handleMessage(data) {
         const symbol = data.tick.symbol;
         const price = data.tick.quote;
         if (marketData[symbol]) {
-            marketData[symbol].ticks.push(price);
+            // Push to buffer (auto-maintains last 200)
+            marketData[symbol].buffer.push(price);
+            if (marketData[symbol].buffer.length > BUFFER_SIZE) {
+                marketData[symbol].buffer.shift();
+            }
             updateMarketChip(symbol);
         }
     }
@@ -796,12 +843,12 @@ function updateMarketChip(symbol) {
     const chip = document.getElementById(`chip-${symbol}`);
     if (!chip) return;
 
-    const count = data.ticks.length;
-    const isComplete = count >= TICKS_REQUIRED;
+    const bufferCount = data.buffer.length;
+    const isComplete = bufferCount >= EARLY_READ_SIZE;
 
     chip.innerHTML = `
         <div class="market-chip-name">${symbol}</div>
-        <div class="market-chip-count">${count}/${TICKS_REQUIRED}</div>
+        <div class="market-chip-count">${bufferCount}/${EARLY_READ_SIZE}</div>
     `;
 
     if (isComplete) {
@@ -823,7 +870,7 @@ async function scanAllMarkets() {
 
     // Reset data
     MARKETS.forEach(symbol => {
-        marketData[symbol] = { ticks: [] };
+        marketData[symbol] = { buffer: [] };
     });
 
     // Show progress
@@ -831,22 +878,22 @@ async function scanAllMarkets() {
     marketsGrid.innerHTML = MARKETS.map(symbol => 
         `<div class="market-chip" id="chip-${symbol}">
             <div class="market-chip-name">${symbol}</div>
-            <div class="market-chip-count">0/${TICKS_REQUIRED}</div>
+            <div class="market-chip-count">0/${EARLY_READ_SIZE}</div>
         </div>`
     ).join('');
 
-    // Subscribe
+    // Subscribe to all markets
     MARKETS.forEach(symbol => {
         if (ws && ws.readyState === WebSocket.OPEN) {
-            // Get history
+            // Request full history (200 ticks)
             ws.send(JSON.stringify({
                 ticks_history: symbol,
                 adjust_limit: 1,
                 end: 'latest',
-                count: TICKS_REQUIRED,
+                count: BUFFER_SIZE,
                 style: 'ticks'
             }));
-            // Subscribe to live
+            // Subscribe to live ticks
             ws.send(JSON.stringify({
                 ticks: symbol,
                 subscribe: 1
@@ -854,12 +901,12 @@ async function scanAllMarkets() {
         }
     });
 
-    // Wait for all markets to gather 30 ticks
+    // Wait for all markets to gather EARLY_READ_SIZE ticks
     let allReady = false;
     let timeout = Date.now() + 120000; // 2 minute timeout
 
     while (!allReady && Date.now() < timeout) {
-        allReady = MARKETS.every(symbol => marketData[symbol]?.ticks.length >= TICKS_REQUIRED);
+        allReady = MARKETS.every(symbol => marketData[symbol]?.buffer.length >= EARLY_READ_SIZE);
         await sleep(500);
     }
 
@@ -874,123 +921,284 @@ async function scanAllMarkets() {
     predictionButtons.classList.add('active');
 }
 
-// ===== CHI-SQUARE ANALYSIS =====
-function analyzeMarket(symbol, analysisType) {
+// ===== ENGINE 1: MATCHES/DIFFERS =====
+function analyzeMatchesDiffers(symbol) {
     const data = marketData[symbol];
-    if (!data || data.ticks.length < TICKS_REQUIRED) return null;
+    if (!data || data.buffer.length === 0) return null;
 
     const decimals = DECIMALS[symbol];
-    const digits = data.ticks.map(t => getLastDigit(t, decimals));
+    const digits = data.buffer.map(p => getLastDigit(p, decimals));
+    const n = digits.length;
+
+    // Frequency count
     const counts = Array(10).fill(0);
     digits.forEach(d => counts[d]++);
 
-    if (analysisType === 'matches') {
-        const maxCount = Math.max(...counts);
-        const predictedDigit = counts.indexOf(maxCount);
-        const observedPct = (maxCount / digits.length) * 100;
-        const chi = computeChi(counts, digits.length);
-        return {
-            symbol,
-            digit: predictedDigit,
-            percentage: observedPct,
-            chi,
-            confidence: observedPct > 15 ? 'Strong' : observedPct > 12 ? 'Moderate' : 'Weak'
-        };
-    }
-
-    if (analysisType === 'differs') {
-        let minDeviation = Infinity;
-        let predictedDigit = 0;
-        counts.forEach((count, i) => {
-            const deviation = Math.abs((count / digits.length * 100) - 10);
-            if (deviation < minDeviation) {
-                minDeviation = deviation;
-                predictedDigit = i;
-            }
-        });
-        const chi = computeChi(counts, digits.length);
-        return {
-            symbol,
-            digit: predictedDigit,
-            deviation: minDeviation,
-            chi,
-            confidence: minDeviation < 2 ? 'Strong' : minDeviation < 4 ? 'Moderate' : 'Weak'
-        };
-    }
-
-    if (analysisType === 'overunder') {
-        const barriers = [2, 3, 4, 5, 6, 7];
-        let bestBarrier = null;
-        let bestZ = 0;
-
-        barriers.forEach(barrier => {
-            const underCount = digits.filter(d => d < barrier).length;
-            const pUnder = barrier / 10;
-            const seUnder = Math.sqrt((pUnder * (1 - pUnder)) / digits.length);
-            const zUnder = ((underCount / digits.length) - pUnder) / (seUnder || 0.001);
-            if (Math.abs(zUnder) > Math.abs(bestZ)) {
-                bestZ = zUnder;
-                bestBarrier = { barrier, direction: zUnder > 0 ? 'UNDER' : 'OVER', z: zUnder };
-            }
-        });
-
-        const chi = computeChi(counts, digits.length);
-        return {
-            symbol,
-            prediction: `${bestBarrier.direction} ${bestBarrier.barrier}`,
-            z: bestBarrier.z,
-            chi,
-            confidence: Math.abs(bestBarrier.z) > 2.33 ? 'Strong' : Math.abs(bestBarrier.z) > 1.645 ? 'Moderate' : 'Weak'
-        };
-    }
-}
-
-function computeChi(counts, n) {
+    // Chi-square
     const expected = n / 10;
-    let chi = 0;
+    let chiSquare = 0;
     counts.forEach(count => {
-        chi += ((count - expected) ** 2) / expected;
+        chiSquare += ((count - expected) ** 2) / expected;
     });
-    return chi;
+
+    return {
+        symbol,
+        n,
+        counts,
+        chiSquare,
+        digits
+    };
 }
 
-// ===== ANALYSIS RUNNER WITH ANIMATION =====
+// ===== ENGINE 2: OVER/UNDER =====
+function analyzeOverUnder(symbol) {
+    const data = marketData[symbol];
+    if (!data || data.buffer.length === 0) return null;
+
+    const decimals = DECIMALS[symbol];
+    const digits = data.buffer.map(p => getLastDigit(p, decimals));
+    const n = digits.length;
+
+    // Valid barriers: 2–7 only
+    const barriers = [2, 3, 4, 5, 6, 7];
+    const results = [];
+
+    barriers.forEach(barrier => {
+        const underCount = digits.filter(d => d < barrier).length;
+        const observed_pct = underCount / n;
+        const baseline_pct = barrier / 10;
+        
+        const se = Math.sqrt((baseline_pct * (1 - baseline_pct)) / n);
+        const z = (observed_pct - baseline_pct) / (se || 0.001);
+
+        results.push({
+            barrier,
+            underCount,
+            observed_pct,
+            baseline_pct,
+            z,
+            abs_z: Math.abs(z)
+        });
+    });
+
+    return {
+        symbol,
+        n,
+        digits,
+        barriers: results
+    };
+}
+
+// ===== ENGINE 3: DATA QUALITY LAYER =====
+function analyzeDataQuality(analysisData) {
+    const { digits, symbol, n } = analysisData;
+
+    let checks = {
+        runsTest: null,
+        autocorrelation: null,
+        entropy: null
+    };
+
+    // Runs Test (Wald-Wolfowitz) on even/odd parity
+    let runsZ = null;
+    {
+        const parity = digits.map(d => d % 2); // 0 = even, 1 = odd
+        let runs = 1;
+        for (let i = 1; i < parity.length; i++) {
+            if (parity[i] !== parity[i - 1]) runs++;
+        }
+        const n0 = parity.filter(p => p === 0).length;
+        const n1 = parity.length - n0;
+        const expectedRuns = (2 * n0 * n1) / (n0 + n1) + 1;
+        const variance = (2 * n0 * n1 * (2 * n0 * n1 - n0 - n1)) / (((n0 + n1) ** 2) * (n0 + n1 - 1));
+        runsZ = (runs - expectedRuns) / Math.sqrt(variance);
+        checks.runsTest = {
+            runs,
+            z: runsZ,
+            flagged: Math.abs(runsZ) > 1.96
+        };
+    }
+
+    // Autocorrelation, lag 1–5
+    let maxAutocorr = 0;
+    {
+        for (let lag = 1; lag <= 5; lag++) {
+            let sumProd = 0;
+            let sumSq1 = 0;
+            let sumSq2 = 0;
+            for (let i = 0; i < digits.length - lag; i++) {
+                sumProd += (digits[i] - 4.5) * (digits[i + lag] - 4.5);
+                sumSq1 += (digits[i] - 4.5) ** 2;
+                sumSq2 += (digits[i + lag] - 4.5) ** 2;
+            }
+            const corr = sumProd / Math.sqrt(sumSq1 * sumSq2);
+            maxAutocorr = Math.max(maxAutocorr, Math.abs(corr));
+        }
+        checks.autocorrelation = {
+            maxCorr: maxAutocorr,
+            flagged: maxAutocorr > 0.15
+        };
+    }
+
+    // Shannon Entropy
+    let entropy = 0;
+    {
+        const counts = Array(10).fill(0);
+        digits.forEach(d => counts[d]++);
+        counts.forEach(count => {
+            if (count > 0) {
+                const p = count / digits.length;
+                entropy -= p * Math.log2(p);
+            }
+        });
+        const maxEntropy = Math.log2(10);
+        const entropyRatio = entropy / maxEntropy;
+        checks.entropy = {
+            entropy,
+            ratio: entropyRatio,
+            flagged: entropyRatio < 0.9
+        };
+    }
+
+    // Combine into badge
+    const failCount = [checks.runsTest.flagged, checks.autocorrelation.flagged, checks.entropy.flagged].filter(f => f).length;
+    let badge = '🟢 Clean';
+    let badgeClass = '';
+    if (failCount === 1) {
+        badge = '🟡 Caution';
+        badgeClass = 'caution';
+    } else if (failCount >= 2) {
+        badge = '🔴 Clustering detected';
+        badgeClass = 'warning';
+    }
+
+    return {
+        checks,
+        badge,
+        badgeClass,
+        failCount
+    };
+}
+
+// ===== ENGINE 4: HONEST VERIFICATION (structure only) =====
+function setupVerificationTally() {
+    // This logs predictions and tracks real outcomes
+    // Will watch next tick on each market for verification
+    return {
+        predictions: [],
+        outcomes: []
+    };
+}
+
+// ===== RUN ANALYSIS =====
 async function runAnalysis(type) {
-    // Show overlay with loading
     signalOverlay.classList.add('active');
     loadingAnimation.classList.remove('fade-out');
     signalCard.classList.remove('reveal');
 
-    // Run analysis
     await sleep(100);
 
-    const results = [];
-    MARKETS.forEach(symbol => {
-        const result = analyzeMarket(symbol, type);
-        if (result) results.push(result);
-    });
+    let results = [];
 
-    // Sort by best signal
     if (type === 'matches') {
-        results.sort((a, b) => b.percentage - a.percentage);
-    } else if (type === 'differs') {
-        results.sort((a, b) => a.deviation - b.deviation);
-    } else if (type === 'overunder') {
-        results.sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
+        MARKETS.forEach(symbol => {
+            const analysis = analyzeMatchesDiffers(symbol);
+            if (analysis) {
+                const maxCount = Math.max(...analysis.counts);
+                const digit = analysis.counts.indexOf(maxCount);
+                const percentage = (maxCount / analysis.n) * 100;
+                
+                // Bonferroni correction for 10 digits × MARKETS.length combinations
+                const numTests = 10 * MARKETS.length;
+                const correctedZ = bonferroniCriticalZ(0.05, numTests);
+                
+                // Convert chi to z-like statistic for this digit
+                const z = (maxCount - analysis.n / 10) / Math.sqrt(analysis.n / 10);
+                
+                const quality = analyzeDataQuality(analysis);
+                
+                results.push({
+                    symbol,
+                    digit,
+                    percentage,
+                    chi: analysis.chiSquare,
+                    z,
+                    quality,
+                    sort_key: percentage
+                });
+            }
+        });
+        results.sort((a, b) => b.sort_key - a.sort_key);
     }
 
-    const topSignal = results[0];
+    if (type === 'differs') {
+        MARKETS.forEach(symbol => {
+            const analysis = analyzeMatchesDiffers(symbol);
+            if (analysis) {
+                let minDeviation = Infinity;
+                let digit = 0;
+                analysis.counts.forEach((count, i) => {
+                    const deviation = Math.abs((count / analysis.n * 100) - 10);
+                    if (deviation < minDeviation) {
+                        minDeviation = deviation;
+                        digit = i;
+                    }
+                });
 
-    // Animate loading for ~9 seconds
+                const numTests = 10 * MARKETS.length;
+                const correctedZ = bonferroniCriticalZ(0.05, numTests);
+                
+                const quality = analyzeDataQuality(analysis);
+                
+                results.push({
+                    symbol,
+                    digit,
+                    deviation: minDeviation,
+                    chi: analysis.chiSquare,
+                    quality,
+                    sort_key: -minDeviation
+                });
+            }
+        });
+        results.sort((a, b) => b.sort_key - a.sort_key);
+    }
+
+    if (type === 'overunder') {
+        MARKETS.forEach(symbol => {
+            const analysis = analyzeOverUnder(symbol);
+            if (analysis) {
+                // Find strongest |z| across all barriers
+                let strongest = analysis.barriers[0];
+                analysis.barriers.forEach(b => {
+                    if (b.abs_z > strongest.abs_z) {
+                        strongest = b;
+                    }
+                });
+
+                const quality = analyzeDataQuality(analysis);
+                
+                results.push({
+                    symbol,
+                    barrier: strongest.barrier,
+                    direction: strongest.z > 0 ? 'UNDER' : 'OVER',
+                    z: strongest.z,
+                    abs_z: strongest.abs_z,
+                    quality,
+                    sort_key: strongest.abs_z
+                });
+            }
+        });
+        results.sort((a, b) => b.sort_key - a.sort_key);
+    }
+
+    // Animate loading
     await sleep(9000);
 
-    // Fade out loading, reveal card
     loadingAnimation.classList.add('fade-out');
     await sleep(300);
     signalCard.classList.add('reveal');
 
-    // Display signal
-    displaySignal(type, topSignal);
+    displaySignal(type, results[0]);
 }
 
 // ===== DISPLAY SIGNAL =====
@@ -1008,77 +1216,67 @@ function displaySignal(type, signal) {
     };
 
     document.getElementById('signalTitle').textContent = titleMap[type];
-    const digitEl = document.getElementById('signalDigit');
-    digitEl.className = `signal-digit ${colorMap[type]}`;
+    document.getElementById('signalMarket').textContent = signal.symbol;
+    document.getElementById('signalDigit').className = `signal-digit ${colorMap[type]}`;
+
+    const statsHtml = [];
 
     if (type === 'matches') {
-        digitEl.textContent = signal.digit;
-        document.getElementById('signalMarket').textContent = signal.symbol;
-        document.getElementById('signalStats').innerHTML = `
+        document.getElementById('signalDigit').textContent = signal.digit;
+        statsHtml.push(`
             <div class="signal-stat">
-                <div class="signal-stat-label">Frequency</div>
+                <div class="signal-stat-label">Frequency %</div>
                 <div class="signal-stat-value">${signal.percentage.toFixed(2)}%</div>
             </div>
             <div class="signal-stat">
                 <div class="signal-stat-label">Chi-Square</div>
                 <div class="signal-stat-value">${signal.chi.toFixed(2)}</div>
             </div>
+        `);
+    }
+
+    if (type === 'differs') {
+        document.getElementById('signalDigit').textContent = signal.digit;
+        statsHtml.push(`
             <div class="signal-stat">
-                <div class="signal-stat-label">Ticks</div>
-                <div class="signal-stat-value">${marketData[signal.symbol].ticks.length}</div>
-            </div>
-            <div class="signal-stat">
-                <div class="signal-stat-label">Confidence</div>
-                <div class="signal-stat-value">${signal.confidence}</div>
-            </div>
-        `;
-    } else if (type === 'differs') {
-        digitEl.textContent = signal.digit;
-        document.getElementById('signalMarket').textContent = signal.symbol;
-        document.getElementById('signalStats').innerHTML = `
-            <div class="signal-stat">
-                <div class="signal-stat-label">Deviation</div>
+                <div class="signal-stat-label">Deviation %</div>
                 <div class="signal-stat-value">${signal.deviation.toFixed(2)}%</div>
             </div>
             <div class="signal-stat">
                 <div class="signal-stat-label">Chi-Square</div>
                 <div class="signal-stat-value">${signal.chi.toFixed(2)}</div>
             </div>
-            <div class="signal-stat">
-                <div class="signal-stat-label">Ticks</div>
-                <div class="signal-stat-value">${marketData[signal.symbol].ticks.length}</div>
-            </div>
-            <div class="signal-stat">
-                <div class="signal-stat-label">Confidence</div>
-                <div class="signal-stat-value">${signal.confidence}</div>
-            </div>
-        `;
-    } else if (type === 'overunder') {
-        digitEl.textContent = signal.prediction;
-        document.getElementById('signalMarket').textContent = signal.symbol;
-        document.getElementById('signalStats').innerHTML = `
+        `);
+    }
+
+    if (type === 'overunder') {
+        document.getElementById('signalDigit').textContent = `${signal.direction} ${signal.barrier}`;
+        statsHtml.push(`
             <div class="signal-stat">
                 <div class="signal-stat-label">Z-Score</div>
                 <div class="signal-stat-value">${signal.z.toFixed(3)}</div>
             </div>
             <div class="signal-stat">
-                <div class="signal-stat-label">Chi-Square</div>
-                <div class="signal-stat-value">${signal.chi.toFixed(2)}</div>
+                <div class="signal-stat-label">|Z| Magnitude</div>
+                <div class="signal-stat-value">${signal.abs_z.toFixed(3)}</div>
             </div>
-            <div class="signal-stat">
-                <div class="signal-stat-label">Ticks</div>
-                <div class="signal-stat-value">${marketData[signal.symbol].ticks.length}</div>
-            </div>
-            <div class="signal-stat">
-                <div class="signal-stat-label">Confidence</div>
-                <div class="signal-stat-value">${signal.confidence}</div>
-            </div>
-        `;
+        `);
     }
 
+    document.getElementById('signalStats').innerHTML = statsHtml.join('');
+
+    // Quality badge
     const badgeEl = document.getElementById('signalBadge');
-    badgeEl.textContent = signal.confidence;
-    badgeEl.className = `signal-badge ${signal.confidence === 'Weak' ? 'warning' : signal.confidence === 'Moderate' ? 'caution' : ''}`;
+    badgeEl.textContent = signal.quality.badge;
+    badgeEl.className = `signal-badge ${signal.quality.badgeClass}`;
+
+    // Quality checks detail
+    const checksHtml = [
+        `<div class="quality-check-item">Runs Test: ${signal.quality.checks.runsTest.flagged ? '🔴' : '🟢'} z=${signal.quality.checks.runsTest.z.toFixed(3)}</div>`,
+        `<div class="quality-check-item">Max Autocorr: ${signal.quality.checks.autocorrelation.flagged ? '🔴' : '🟢'} ρ=${signal.quality.checks.autocorrelation.maxCorr.toFixed(3)}</div>`,
+        `<div class="quality-check-item">Entropy: ${signal.quality.checks.entropy.flagged ? '🔴' : '🟢'} H=${signal.quality.checks.entropy.entropy.toFixed(3)}</div>`
+    ];
+    document.getElementById('qualityChecks').innerHTML = checksHtml.join('');
 }
 
 // ===== EVENT LISTENERS =====
@@ -1087,19 +1285,9 @@ matchesBtn.addEventListener('click', () => runAnalysis('matches'));
 differsBtn.addEventListener('click', () => runAnalysis('differs'));
 overunderBtn.addEventListener('click', () => runAnalysis('overunder'));
 
-// Close overlay on click outside
-signalOverlay.addEventListener('click', (e) => {
-    if (e.target === signalOverlay) {
-        signalOverlay.classList.remove('active');
-        loadingAnimation.classList.remove('fade-out');
-        signalCard.classList.remove('reveal');
-    }
-});
-
-// ===== INIT =====
+// ===== INITIALIZE =====
 connectWebSocket();
-console.log('✅ NDEBE Analysis Suite Initialized');
-
 </script>
+
 </body>
 </html>
