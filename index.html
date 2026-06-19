@@ -292,11 +292,11 @@
 // ============================================================
 // CONFIGURATION
 // ============================================================
-// ✅ UPDATED: Correct App ID from Dashboard
 const CLIENT_ID = "33B44tAtovshIdemNunD";
 
-// ✅ UPDATED: Uses dynamic URL with .html extension
-const REDIRECT_URI = window.location.origin + "/callback.html";
+// ✅ FIXED: Use the root URL (no /callback.html)
+// Deriv will redirect to: https://ndebe-trade-pro-ori.vercel.app/?code=XXXXX
+const REDIRECT_URI = window.location.origin + "/";
 
 let accessToken = null;
 let ws = null;
@@ -323,7 +323,7 @@ function loginWithDeriv() {
     const state = Math.random().toString(36).substring(7);
     localStorage.setItem('oauth_state', state);
 
-    // ✅ UPDATED: Correct scopes — 'trade account_manage' (NOT 'read')
+    // ✅ Deriv will redirect back to the root URL with ?code=XXXXX
     const authUrl = 'https://auth.deriv.com/oauth2/auth?' +
         'response_type=code' +
         '&client_id=' + CLIENT_ID +
@@ -346,10 +346,10 @@ function handleOAuthCallback() {
     }
 
     if (code) {
-        console.log('✅ Authorization code received');
+        console.log('✅ Authorization code received:', code);
         localStorage.setItem('auth_code', code);
         exchangeCodeForToken(code);
-        // Clean URL
+        // Clean URL without reloading
         window.history.replaceState({}, document.title, '/');
     }
 }
@@ -436,29 +436,24 @@ function connectWebSocket() {
 // WEBSOCKET MESSAGE HANDLER
 // ============================================================
 function handleMessage(data) {
-    // Authorization success
     if (data.authorize) {
         console.log('✅ Authorized');
         showMessage('✅ Authorized! Fetching account details...');
     }
 
-    // Account list
     if (data.get_account_list) {
         console.log('📋 Accounts:', data.get_account_list.accounts);
         displayAccounts(data.get_account_list.accounts);
     }
 
-    // User info
     if (data.get_self) {
         document.getElementById('userName').textContent = data.get_self.name || 'Trader';
     }
 
-    // Balance
     if (data.balance) {
         updateBalance(data.balance);
     }
 
-    // Tick
     if (data.tick) {
         const symbol = data.tick.symbol;
         const price = data.tick.quote;
@@ -471,7 +466,6 @@ function handleMessage(data) {
         updateLivePrice(symbol, price);
     }
 
-    // Ticks history
     if (data.ticks_history && data.ticks) {
         const symbol = data.ticks_history;
         const ticks = data.ticks.map(t => t.quote);
@@ -479,7 +473,6 @@ function handleMessage(data) {
         updateMarketChip(symbol);
     }
 
-    // Trade response
     if (data.proposal) {
         console.log('✅ Trade proposal:', data.proposal);
         document.getElementById('tradeStatus').textContent = '✅ Trade placed!';
@@ -492,7 +485,6 @@ function handleMessage(data) {
         showMessage('✅ Trade confirmed! ID: ' + data.buy.contract_id);
     }
 
-    // Errors
     if (data.error) {
         console.error('❌ API Error:', data.error);
         showMessage('❌ ' + data.error.message);
@@ -510,7 +502,6 @@ function displayAccounts(accounts) {
         accountDetails.demo = demo;
         document.getElementById('demoId').textContent = 'ID: ' + demo.loginid;
         document.getElementById('demoCurrency').textContent = demo.currency || 'USD';
-        // Subscribe to demo balance
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({
                 balance: 1,
@@ -524,7 +515,6 @@ function displayAccounts(accounts) {
         accountDetails.real = real;
         document.getElementById('realId').textContent = 'ID: ' + real.loginid;
         document.getElementById('realCurrency').textContent = real.currency || 'USD';
-        // Subscribe to real balance
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({
                 balance: 1,
@@ -534,7 +524,6 @@ function displayAccounts(accounts) {
         }
     }
 
-    // Unlock the app
     unlockApp();
     showMessage('✅ Account loaded successfully!');
 }
@@ -617,7 +606,6 @@ function updateLivePrice(symbol, price) {
     document.getElementById('livePriceSection').style.display = 'block';
     document.getElementById('livePrice').textContent = price.toFixed(2);
 
-    // Add to tick feed
     const feed = document.getElementById('tickFeed');
     const chip = document.createElement('span');
     chip.textContent = price.toFixed(2);
@@ -672,7 +660,6 @@ function scanAllMarkets() {
 // UPDATE MARKET CHIP
 // ============================================================
 function updateMarketChip(symbol) {
-    // Simple visual feedback
     const btn = document.getElementById('scanBtn');
     btn.textContent = '✓ ' + symbol + ' loaded';
     setTimeout(function() {
@@ -708,7 +695,6 @@ function placeTrade(type) {
         return;
     }
 
-    // Find account ID (prefer real, fallback to demo)
     let loginid = null;
     if (accountDetails.real) {
         loginid = accountDetails.real.loginid;
