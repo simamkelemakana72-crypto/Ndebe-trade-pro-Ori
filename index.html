@@ -295,7 +295,8 @@
 // CONFIGURATION
 // ============================================================
 const CLIENT_ID = "33B44tAtovshdIedmNunD";
-const REDIRECT_URI = window.location.origin + "/callback";
+// *** FIXED: Redirect URL now ends with .html ***
+const REDIRECT_URI = window.location.origin + "/callback.html";
 
 let accessToken = null;
 let ws = null;
@@ -769,4 +770,4 @@ handleOAuthCallback();
 restoreSession();
 </script>
 </body>
-</html>
+                </html>
