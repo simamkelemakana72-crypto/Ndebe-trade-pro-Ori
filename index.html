@@ -173,11 +173,9 @@
         }
         .btn-main:hover { background: linear-gradient(180deg, rgba(155,89,182,0.6), rgba(155,89,182,0.2)); }
         .btn-main:disabled { opacity: 0.3; cursor: not-allowed; }
-        .mt-8 { margin-top: 8px; }
-        .mb-8 { margin-bottom: 8px; }
-        .text-center { text-align: center; }
         .text-muted { color: #8870a8; }
         .text-sm { font-size: 0.8rem; }
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
@@ -294,8 +292,10 @@
 // ============================================================
 // CONFIGURATION
 // ============================================================
-const CLIENT_ID = "33B44tAtovshdIedmNunD";
-// *** FIXED: Redirect URL now ends with .html ***
+// ✅ UPDATED: Correct App ID from Dashboard
+const CLIENT_ID = "33B44tAtovshIdemNunD";
+
+// ✅ UPDATED: Uses dynamic URL with .html extension
 const REDIRECT_URI = window.location.origin + "/callback.html";
 
 let accessToken = null;
@@ -323,11 +323,12 @@ function loginWithDeriv() {
     const state = Math.random().toString(36).substring(7);
     localStorage.setItem('oauth_state', state);
 
+    // ✅ UPDATED: Correct scopes — 'trade account_manage' (NOT 'read')
     const authUrl = 'https://auth.deriv.com/oauth2/auth?' +
         'response_type=code' +
         '&client_id=' + CLIENT_ID +
         '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) +
-        '&scope=read trade' +
+        '&scope=trade account_manage' +
         '&state=' + state;
 
     console.log('🔐 Redirecting to:', authUrl);
@@ -770,4 +771,4 @@ handleOAuthCallback();
 restoreSession();
 </script>
 </body>
-                </html>
+    </html>
