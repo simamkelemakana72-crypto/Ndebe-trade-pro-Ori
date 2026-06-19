@@ -11,7 +11,7 @@
             height: 100%;
             background: #0A0618;
             color: #f0ecf5;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -39,32 +39,21 @@
     <div class="container">
         <div class="spinner"></div>
         <h2>🔐 Authenticating...</h2>
-        <p>Please wait while we log you in</p>
+        <p>Please wait</p>
         <div class="error" id="errorMsg"></div>
     </div>
-
     <script>
-        (function() {
-            const params = new URLSearchParams(window.location.search);
-            const code = params.get('code');
-            const error = params.get('error');
-            const errorDesc = params.get('error_description');
-
-            if (error) {
-                document.getElementById('errorMsg').textContent = '❌ ' + (errorDesc || error);
-                setTimeout(function() {
-                    window.location.href = '/';
-                }, 3000);
-                return;
-            }
-
-            if (code) {
-                console.log('✅ Code received, redirecting to app...');
-                window.location.href = '/?code=' + encodeURIComponent(code);
-            } else {
-                window.location.href = '/';
-            }
-        })();
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const error = params.get('error');
+        if (error) {
+            document.getElementById('errorMsg').textContent = '❌ ' + error;
+            setTimeout(() => window.location.href = '/', 3000);
+        } else if (code) {
+            window.location.href = '/?code=' + encodeURIComponent(code);
+        } else {
+            window.location.href = '/';
+        }
     </script>
 </body>
 </html>
